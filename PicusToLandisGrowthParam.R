@@ -13,11 +13,12 @@ readDir <- ifelse(Sys.info()["sysname"]=="Linux",
                     paste("C:/Dropbox/Landis/SCF_IA_LANDIS"))  ### read-only folder, on my laptop (windows or Linux)
 
 processedDir <- paste(readDir, "Picus/processedOutputs", sep="/")
+dir.create(processedDir)
 wwd <- paste(processedDir, Sys.Date(), sep="/")
 dir.create(wwd)
 vegCodes <- read.csv(file=paste(readDir, "vegCodes.csv", sep="/"))
 ######################
-picusOutputsDF <- read.csv(paste(processedDir, "picusOutputsDF.csv", sep="/"))  ### this .csv file is produced by 
+picusOutputsDF <- read.csv(paste(readDir, "/Picus/picusOutputsDF.csv", sep="/"))  ### this .csv file is produced by 
 picusOutputsDF$landtype <- as.factor(picusOutputsDF$landtype)
 ######################
 
@@ -57,8 +58,8 @@ for (s in levels(picusOutputsDF$scenario)) { # s <- "Baseline"
     growthParam[[s]][[p]][["maxANPP"]] <- maxANPP
       #####
 #     ##comment this out to produce .csv files
-#     write.csv(maxANPP, file=paste(paste(wwd,"/maxANPP_",s,"_",p,".csv", sep="")))
-#     write.csv(maxBiomass, file=paste(paste(wwd,"/maxBiomass_",s,"_",p,".csv", sep="")))
+    write.csv(maxANPP, file=paste(paste(wwd,"/maxANPP_",s,"_",p,".csv", sep="")))
+    write.csv(maxBiomass, file=paste(paste(wwd,"/maxBiomass_",s,"_",p,".csv", sep="")))
 #     #####
   }
 }
@@ -89,9 +90,14 @@ for (i in seq_along(landisCCScenarios)){# i <- 1
     
     maxBiomass <- as.data.frame(growthParam[[s]][[p]][["maxBiomass"]])
     maxANPP <- as.data.frame(growthParam[[s]][[p]][["maxANPP"]])
+
     spp <- rep(rownames(maxBiomass), ncol(maxANPP))
     maxBiomass <- stack(maxBiomass)
     maxANPP <- stack(maxANPP) 
+    
+    maxBiomass[is.na(maxBiomass)] <- 0
+    maxANPP[is.na(maxANPP)] <- 0
+    
      
     paramsTmp <- data.frame(year = rep(y[j], length(spp)),
                              landtype=maxBiomass$ind,

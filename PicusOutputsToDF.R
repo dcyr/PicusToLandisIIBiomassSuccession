@@ -130,11 +130,10 @@ picusOutputsDF[,"period"] <- as.factor(picusOutputsDF[,"period"])
 picusOutputsDF[,"landtype"] <- as.factor(picusOutputsDF[,"landtype"])
 picusOutputsDF[,"species"] <- as.factor(picusOutputsDF[,"species"])
 
-processedDir <- paste(readDir, "picus/processedOutputs", sep="/")
-dir.create(processedDir)
-write.csv(picusOutputsDF, paste(processedDir, "picusOutputsDF.csv", sep="/"), row.names=FALSE)
+wwd <- paste(readDir, "Picus", sep="/")
+dir.create(wwd)
+write.csv(picusOutputsDF, paste(wwd, "picusOutputsDF.csv", sep="/"), row.names=FALSE)
 
-#summary(picusOutputsDF)
 
 
   

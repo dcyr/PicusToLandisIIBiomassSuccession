@@ -1,7 +1,8 @@
 ######################
 ######################
 #######
-#######   Extraction of maxANPP and maxBiomass from PICUS outputs
+#######   Extraction of maxANPP and maxBiomass from PICUS outputs (depends on "PicusOutputsToDF.r")
+#######   + SEP (depends on "PicusToLandisSEP.r")
 #######   Dominic Cyr
 #######
 #####################
@@ -81,7 +82,9 @@ landisCCScenarios <- list(RCP85 = list("0" = c("Baseline", "Baseline"),
 
 
 #### assembling parameters according to landis format
+pEst <- get(load(paste(processedDir,"pEst.RData", sep="/")))
 biomassSuccessionDynamicParams <- list()
+
 for (i in seq_along(landisCCScenarios)){# i <- 1
   y <- as.numeric(names(landisCCScenarios[[i]]))
   for (j in seq_along(y)) { # j <- 1 
@@ -90,10 +93,11 @@ for (i in seq_along(landisCCScenarios)){# i <- 1
     
     maxBiomass <- as.data.frame(growthParam[[s]][[p]][["maxBiomass"]])
     maxANPP <- as.data.frame(growthParam[[s]][[p]][["maxANPP"]])
-
+    SEP <- as.data.frame(pEst[[s]][[p]])
     spp <- rep(rownames(maxBiomass), ncol(maxANPP))
     maxBiomass <- stack(maxBiomass)
-    maxANPP <- stack(maxANPP) 
+    maxANPP <- stack(maxANPP)
+    SEP <- stack(SEP)
     
     maxBiomass[is.na(maxBiomass)] <- 0
     maxANPP[is.na(maxANPP)] <- 0
@@ -102,7 +106,7 @@ for (i in seq_along(landisCCScenarios)){# i <- 1
     paramsTmp <- data.frame(year = rep(y[j], length(spp)),
                              landtype=maxBiomass$ind,
                              species = spp,
-                             probEst = rep("TBA", length(spp)),  ##### "probEst" To Be Attributed 
+                             probEst = SEP$values,  ##### "probEst" To Be Attributed 
                              maxANPP = maxANPP$values,
                              maxB = maxBiomass$values)
     if(exists("params")) {

@@ -30,11 +30,8 @@ area <- unique(rapply(outputInfo, function(x) x[2]))
 scenarios <- unique(rapply(outputInfo, function(x) x[3]))
 periods <- unique(rapply(outputInfo, function(x) x[4]))
 ######################
-######### This big loop read all csv files and gather informatino into a big dataframe
+######### This big loop read all csv files and gather information into a big dataframe
 #############
-require(stringr)
-#############
-########
 picusOutputs <- list()
 for (a in area) {
   picusOutputs[[a]] <- list()
@@ -46,8 +43,8 @@ for (a in area) {
  
   for (i in seq_along(folderNames)) {
     
-    s <- outputInfo[[i]][3]  ### nom du scénario
-    p <- outputInfo[[i]][length(outputInfo[[i]])] ## nom de la période 
+    s <- outputInfo[[i]][3]  ### nome of scenario
+    p <- outputInfo[[i]][length(outputInfo[[i]])] ## name of period
     
     #### creation of lists where dataframes are stored
     if (s %in% names(picusOutputs[[a]]) == F) {
@@ -68,7 +65,7 @@ for (a in area) {
       deadwoodIndex <- grep("Deadwood", x)
       standIndex <- grep("Stand", x)  
         
-      #### indentifying .csv files
+      #### identifying .csv files
       
       #### read corresponding .csv files
       sppDeadwood <- x[intersect(sppIndex, deadwoodIndex)]  
@@ -124,6 +121,7 @@ for (a in names(picusOutputs)){
   }
 }
 
+### converting character vectors into factor (not really useful since it all goes into a .csv file)
 picusOutputsDF[,"ecozone"] <- as.factor(picusOutputsDF[,"ecozone"])
 picusOutputsDF[,"scenario"] <- as.factor(picusOutputsDF[,"scenario"])
 picusOutputsDF[,"period"] <- as.factor(picusOutputsDF[,"period"])

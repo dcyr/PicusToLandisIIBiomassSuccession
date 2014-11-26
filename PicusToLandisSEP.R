@@ -24,8 +24,12 @@ picusOutputsDF$landtype <- as.factor(picusOutputsDF$landtype)
 
 attach(picusOutputsDF)
 
-spp <- levels(species)
 landtypes <- levels(landtype)
+spp <- levels(species)
+spp_landis <- character()
+for (sp in spp) {
+  spp_landis <- append(spp_landis, as.character(vegCodes[which(vegCodes$PICUS_name ==sp), "Code_LANDIS"]))
+}
 
 #################
 ########  The following loop creates matrices of time necessary for the first accumulation of biomass in each
@@ -41,13 +45,13 @@ for (s in levels(picusOutputsDF$scenario)){
   for (p in levels(xS$period)) {
     xP <- subset(xS, subset=xS$period==p)
     xP <- droplevels(xP)
-    timeBeforeBiomass[[s]][[p]] <- pEst[[s]][[p]] <- matrix(NA, nrow=length(spp), ncol=length(landtypes), dimnames=list(spp, landtypes))
+    timeBeforeBiomass[[s]][[p]] <- pEst[[s]][[p]] <- matrix(NA, nrow=length(spp), ncol=length(landtypes), dimnames=list(spp_landis, landtypes))
     for (l in landtypes) {
       xL <- subset(xP, subset=xP$landtype==l)     
-      for (sp in spp) {
-        x <- subset(xL, subset=xL$species==sp)  
-        timeBeforeBiomass[[s]][[p]][sp, l] <- x[min(which(x$BiomassAbove_kg_ha>0)), "Year"] - 2000
-        print(paste(s, p, l, sp))
+      for (sp in seq_along(spp)) {
+        x <- subset(xL, subset=xL$species==spp[sp])  
+        timeBeforeBiomass[[s]][[p]][spp_landis[sp], l] <- x[min(which(x$BiomassAbove_kg_ha>0)), "Year"] - 2000
+        print(paste(s, p, l, spp_landis[sp]))
       }
     }
   prob <- round(pbinom(q=0, size=10, prob=1/timeBeforeBiomass[[s]][[p]], lower.tail=FALSE), 3)
@@ -58,8 +62,10 @@ for (s in levels(picusOutputsDF$scenario)){
   }
 }
 save(pEst, file=paste(wwd, "/pEst.RData", sep=""))
+
+
 # ##########
-# ##########
+# ### Optional output
 # ### figure PICUS vs pEst Landis
 # ##########
 # 

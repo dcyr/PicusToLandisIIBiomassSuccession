@@ -1,0 +1,69 @@
+---
+title: "PicusToLandisGrowthParam"
+author: "Dominic Cyr"
+date: "Tuesday, November 25, 2014"
+output: html_document
+---
+
+# CodeBook for *PicusToLandisGrowthParam.R*
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+## General description
+
+This is documentation for [*PicusToLandisGrowthParam.R*](insertURL), which yields growth parameters (**maxANPP** and **maxBiomass**) from previously formatted PICUS outputs.
+
+- **maxANPP** is the maximum aboveground net primary productivity in grams per sq-meters per year. It can be achieved in free growth conditions, i.e. in absence of inter- or intra-specific competition.
+- **maxBiomass** is the maximum biomass than one species can attain on a given site, in grams per sq-meters.
+
+More details about those parameters, how the participate to succession as simulated by LANDIS-II and how they interact with each other, are available in [Scheller et al. 2004](http://landscape.forest.wisc.edu/PDF/Scheller_Mladenoff2004_EM.pdf), as well as in the latest [Biomass Succession documentation](http://www.landis-ii.org/extensions/biomass-succession) for an updated version.
+
+## Primary input
+A data table *picusOutputsDF.csv* produced by the script [*PicusOutputsToDF.R*](insert URL), which contains all necessary information to compute **maxANPP** and **maxBiomass**, for every combinations of species and landtypes. That .csv file may contain information from one or more study area, climate scenario, and period.
+
+The location of *picusOutputsDF.csv* must be specified and can be assigned to variable **processedDir**.
+
+```{r}
+summary(picusOutputsDF)
+```
+
+### Seconday input
+A few additionnal information contained in *vegCodes.csv* allows for a smoother processing of multiple species and simulation areas. That table contains the scientific names, common names, LANDIS names, etc., and the species to include in each simulation areas (as binary variables).
+```{r}
+head(vegCodes)  ### first lines of table 'vegCodes.csv'
+```
+
+## Primary ouput
+A structured R list *growthParam.RData*  containing the extracted growth parameters **maxANPP** and **maxBiomass**. Its hierarchical structure should facilitate the use of loops in downstream analysis.
+
+That object is saved in the folder **wwd**, and overwrite any existing file of the same name. A new folder is generated one is generated every day using current date.
+
+
+There are currently 2 implemented methods for computing **maxBiomass**, and three for computing **maxANPP**. Only one should be commented out in the code, else, the last one will overwrite any previous results.
+
+* __maxBiomass__
+  + **Old method:** The maximum value of accumulated biomass in Picus is computed and used as maxBiomass.
+  + **New method:** The average value after a given amount of time (typically 100 or 150 years) is computed and used as maxBiomass. This method seems to allow for an almost perfect fit when establishment is not limited by light conditions.
+  
+* __maxANPP__
+  + **Method 1:** The maximum instant (yearly) increment in biomass is computed from PICUS output and used as maxANPP.
+  + **Method 2:** Simular to method 1, but the annual increment in biomass is smoothed using a moving average before extracting the maximum value.
+  + **Method 3:** The average NPP before reaching the maximum biomass is computed and used as maxANPP. (That method departs a bit from the intended definitino of the parameter, but seems to produce values that are closer than what's reported in the litterature.)
+
+```{r}
+picusOutputsDF$landtype <- as.factor(picusOutputsDF$landtype)
+str(growthParam)  ### Shows the structure of the list produced 
+```
+
+### Optional outputs
+Wide tables can be produced for each parameter, scenario, and period, which allow for better readibility. They are stored in .csv files in the **wwd** folder.
+
+
+Here is an example of all outputs that can be produced:
+
+```{r}
+list.files(wwd)
+```
+
+
+

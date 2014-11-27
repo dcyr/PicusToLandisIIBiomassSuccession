@@ -186,8 +186,30 @@ summary(picusOutputsDF)
 ```
 
 ```
-## Length  Class   Mode 
-##      0   NULL   NULL
+##  ecozone           scenario            period           landtype      
+##  BSE:2070590   Baseline: 302406   20112040: 360987   4225   :  28182  
+##                RCP26   : 365246   20412070: 363716   4205   :  28154  
+##                RCP45   : 363440   20712100:1043481   4223   :  28107  
+##                RCP85   :1039498   Baseline: 302406   4175   :  28102  
+##                                                      4413   :  28066  
+##                                                      4011   :  27999  
+##                                                      (Other):1901980  
+##                 species             Year      BiomassAbove_kg_ha
+##  Pinus_banksiana    : 142200   Min.   :2000   Min.   :     0    
+##  Betula_papyrifera  : 139394   1st Qu.:2075   1st Qu.: 35933    
+##  Populus_tremuloides: 138847   Median :2150   Median : 81325    
+##  Thuja_occidentalis : 137709   Mean   :2150   Mean   : 77241    
+##  Pinus_strobus      : 136786   3rd Qu.:2225   3rd Qu.:110892    
+##  Pinus_resinosa     : 136691   Max.   :2299   Max.   :388526    
+##  (Other)            :1238963                                    
+##  DiedBiomassAbove_kg      anpp      
+##  Min.   :    0       Min.   :-6185  
+##  1st Qu.: 1784       1st Qu.: 1552  
+##  Median : 3305       Median : 3423  
+##  Mean   : 3432       Mean   : 3682  
+##  3rd Qu.: 4780       3rd Qu.: 5085  
+##  Max.   :28266       Max.   :95158  
+## 
 ```
 
 

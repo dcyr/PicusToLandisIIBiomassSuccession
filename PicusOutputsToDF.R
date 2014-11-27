@@ -7,7 +7,7 @@
 ######################
 ######################
 rm(list=ls())
-
+ 
 #readDir <- paste("C:/Users/dcyr/Dropbox/Landis/SCF_IA_LANDIS")   ### read-only folder, cfl system
 readDir <- ifelse(Sys.info()["sysname"]=="Linux",
                   paste("/media/dcyr/Windows7_OS/Dropbox/landis/SCF_IA_LANDIS"),
@@ -29,8 +29,10 @@ folderNames <- paste(readDir, "Picus/Outputs", folderNames, sep="/")
 area <- unique(rapply(outputInfo, function(x) x[2]))
 scenarios <- unique(rapply(outputInfo, function(x) x[3]))
 periods <- unique(rapply(outputInfo, function(x) x[4]))
+
 ######################
 ######### This big loop read all csv files and gather information into a big dataframe
+require(stringr) 
 #############
 picusOutputs <- list()
 for (a in area) {

@@ -61,7 +61,7 @@ for (s in levels(picusOutputsDF$scenario)){
   write.csv(prob, file=paste(wwd, "/pEst_", s,"_", p, ".csv", sep="")) 
   }
 }
-save(pEst, file=paste(wwd, "/pEst.RData", sep=""))
+save(pEst, file=paste(wwd, "/SEP.RData", sep=""))
 
 
 # ##########

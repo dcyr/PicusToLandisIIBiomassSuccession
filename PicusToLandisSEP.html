@@ -196,7 +196,7 @@ hr {
 
 <h2>General description</h2>
 
-<p>This is documentation for <a href="insertURL"><em>PicusToLandisSEP.R</em></a>, which yields species establishment probabilities (<strong>SEP</strong>) from previously formatted PICUS outputs.</p>
+<p>This is documentation for <a href="http://github.com/dcyr/Landis-II-SCF/blob/master/PicusToLandisSEP.R"><em>PicusToLandisSEP.R</em></a>, which yields species establishment probabilities (<strong>SEP</strong>) from previously formatted PICUS outputs.</p>
 
 <ul>
 <li><strong>SEP</strong> is the probability of a cohort to successfully establish on a site during one time step, given that seeds reach it and that light conditions are adequate. It can range from 0 to 1.</li>
@@ -206,14 +206,37 @@ hr {
 
 <h2>Primary input</h2>
 
-<p>A data table <em>picusOutputsDF.csv</em> produced by the script <a href="insert%20URL"><em>PicusOutputsToDF.R</em></a>, which contains all necessary information to compute <strong>SEP</strong>, for every combinations of species and landtypes. That .csv file may contain information from one or more study area, climate scenario, and period.</p>
+<p>A data table <em>picusOutputsDF.csv</em> produced by the script <a href="http://github.com/dcyr/Landis-II-SCF/blob/master/PicusOutputsToDF.R"><em>PicusOutputsToDF.R</em></a>, which contains all necessary information to compute <strong>SEP</strong>, for every combinations of species and landtypes. That .csv file may contain information from one or more study area, climate scenario, and period.</p>
 
 <p>The location of <em>picusOutputsDF.csv</em> must be specified and can be assigned to variable <strong>processedDir</strong>.</p>
 
 <pre><code class="r">summary(picusOutputsDF)
 </code></pre>
 
-<pre><code>## Error: object &#39;picusOutputsDF&#39; not found
+<pre><code>##  ecozone           scenario            period           landtype      
+##  BSE:2070590   Baseline: 302406   20112040: 360987   4225   :  28182  
+##                RCP26   : 365246   20412070: 363716   4205   :  28154  
+##                RCP45   : 363440   20712100:1043481   4223   :  28107  
+##                RCP85   :1039498   Baseline: 302406   4175   :  28102  
+##                                                      4413   :  28066  
+##                                                      4011   :  27999  
+##                                                      (Other):1901980  
+##                 species             Year      BiomassAbove_kg_ha
+##  Pinus_banksiana    : 142200   Min.   :2000   Min.   :     0    
+##  Betula_papyrifera  : 139394   1st Qu.:2075   1st Qu.: 35933    
+##  Populus_tremuloides: 138847   Median :2150   Median : 81325    
+##  Thuja_occidentalis : 137709   Mean   :2150   Mean   : 77241    
+##  Pinus_strobus      : 136786   3rd Qu.:2225   3rd Qu.:110892    
+##  Pinus_resinosa     : 136691   Max.   :2299   Max.   :388526    
+##  (Other)            :1238963                                    
+##  DiedBiomassAbove_kg      anpp      
+##  Min.   :    0       Min.   :-6185  
+##  1st Qu.: 1784       1st Qu.: 1552  
+##  Median : 3305       Median : 3423  
+##  Mean   : 3432       Mean   : 3682  
+##  3rd Qu.: 4780       3rd Qu.: 5085  
+##  Max.   :28266       Max.   :95158  
+## 
 </code></pre>
 
 <h3>Seconday input</h3>
@@ -223,7 +246,20 @@ hr {
 <pre><code class="r">head(vegCodes)  ### first lines of table &#39;vegCodes.csv&#39;
 </code></pre>
 
-<pre><code>## Error: object &#39;vegCodes&#39; not found
+<pre><code>##   Code      Common.name                    Scientific.name Farrar.1995.
+## 1  100           Spruce                              Picea           95
+## 2  101     Black spruce          Picea mariana (Mill.) BSP          106
+## 3  102       Red spruce                 Picea rubens Sarg.          104
+## 4  103  Norway spruce *            Picea abies (L.) Karst.          108
+## 5  104 Engelmann spruce Picea engelmannii Parry ex Engelm.          100
+## 6  105     White spruce         Picea glauca (Moench) Voss          102
+##   Life.form Code_LANDIS Veg_rep    PICUS_name BSE
+## 1      &lt;NA&gt;        &lt;NA&gt;      NA          &lt;NA&gt;   0
+## 2     ST-MT    PICE.MAR       0 Picea_mariana   1
+## 3        MT    PICE.RUB       0  Picea_rubens   0
+## 4        LT        &lt;NA&gt;      NA          &lt;NA&gt;   0
+## 5 LT (-VLT)    PICE.ENG       0          &lt;NA&gt;   0
+## 6        MT    PICE.GLA       0  Picea_glauca   1
 </code></pre>
 
 <h2>Primary ouput</h2>

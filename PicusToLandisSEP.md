@@ -22,14 +22,24 @@ A data table *picusOutputsDF.csv* produced by the script [*PicusOutputsToDF.R*](
 
 The location of *picusOutputsDF.csv* must be specified and can be assigned to variable **processedDir**.
 
-```{r}
+
+```r
 summary(picusOutputsDF)
+```
+
+```
+## Error: object 'picusOutputsDF' not found
 ```
 
 ### Seconday input
 A few additionnal information contained in *vegCodes.csv* allows for a smoother processing of multiple species and simulation areas. That table contains the scientific names, common names, LANDIS names, etc., and the species to include in each simulation areas (as binary variables).
-```{r}
+
+```r
 head(vegCodes)  ### first lines of table 'vegCodes.csv'
+```
+
+```
+## Error: object 'vegCodes' not found
 ```
 
 
@@ -48,7 +58,8 @@ Then, we consider the establishment of a cohort as a Bernouilli trial conducted 
 
 The SEP varies as a function of time before accumulating biomass as followed: 
 
-```{r}
+
+```r
 x <- seq(from=1, to=300, by=0.5)
 y <- pbinom(q=0, size=10, prob=1/x, lower.tail=FALSE)
 plot(x, y, log="x", type="l",
@@ -58,6 +69,8 @@ plot(x, y, log="x", type="l",
      ylab="Corresponding SEP in LANDIS-II (10-yr. timesteps)")
   grid(equilogs=FALSE)  
 ```
+
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
 
 
 

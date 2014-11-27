@@ -2,7 +2,7 @@
 title: "PicusToLandisAssembly"
 author: "Dominic Cyr"
 date: "Tuesday, November 25, 2014"
-output: word_document
+output: html_document
 ---
 
 # CodeBook for *PicusToLandisAssembly.R*

@@ -21,6 +21,13 @@ Note that some secondary (required) inputs and optional are not shown on this fi
 
 More details about each steps can be found in the markdown files (.md) that are associated with each script.
 
++ [PicusOutputsToDF.R](http://github.com/dcyr/Landis-II-SCF/blob/master/PicusOutputsToDF.R) allow to process PICUS outputs in batch and yields a tidy data table to be used as input in downstream steps of the pipeline. Description [here](http://github.com/dcyr/Landis-II-SCF/blob/master/PicusOutputsToDF.md).
++ [PicusToLandisGrowthParam.R](http://github.com/dcyr/Landis-II-SCF/blob/master/PicusToLandisGrowthParam.R) yields growth parameters (**maxANPP** and **maxBiomass**) from previously formatted PICUS outputs. Description [here](http://github.com/dcyr/Landis-II-SCF/blob/master/PicusToLandisSEP.md).
++ [PicusToLandisSEP.R](http://github.com/dcyr/Landis-II-SCF/blob/master/PicusToLandisSEP.R) yields Species Establishment Probabilities (SEP) from previously formatted PICUS outputs. Description [here](http://github.com/dcyr/Landis-II-SCF/blob/master/PicusToLandisSEP.md)
++ [PicusToLandisSEP.R](http://github.com/dcyr/Landis-II-SCF/blob/master/PicusToLandisSEP.R). takes the information contained in *growthParam.RData* and *pEst.RData*, produced by [PicusToLandisGrowthParam.R](http://github.com/dcyr/Landis-II-SCF/blob/master/PicusToLandisGrowthParam.R) and [PicusToLandisSEP.R](http://github.com/dcyr/Landis-II-SCF/blob/master/PicusToLandisSEP.R), respectively, and format them into .txt files ready to be used as [LANDIS-II](http://www.landis-ii.org/) [*Biomass Succesion*](http://www.landis-ii.org/extensions/biomass-succession) dynamic inputs.
+
+
+
 Other useful scripts may be added soon.
 
 More details about those parameters, how the participate to succession as simulated by LANDIS-II and how they interact with each other, are available in [Scheller et al. 2004](http://landscape.forest.wisc.edu/PDF/Scheller_Mladenoff2004_EM.pdf), as well as in the latest [Biomass Succession documentation](http://www.landis-ii.org/extensions/biomass-succession) for an updated version.

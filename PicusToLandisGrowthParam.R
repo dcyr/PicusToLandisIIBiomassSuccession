@@ -47,6 +47,7 @@ for (sp in spp) {
 
 ##### beginning of loops (another loop could be added to process multiple simulation areas)
 growthParam <- list()
+require(caTools)
 for (s in levels(picusOutputsDF$scenario)) { ## beginning of scenario loop   # s <- "Baseline" 
   growthParam[[s]] <- list()
   ###subsetting for the climate scenario
@@ -100,10 +101,10 @@ for (s in levels(picusOutputsDF$scenario)) { ## beginning of scenario loop   # s
       #maxA <- by(picusOutputsSp$anpp, picusOutputsSp$landtype, max, na.rm=TRUE)  ### old method, no smoothing => max instant.ANPP
       
       ### method 2 - smoothing ANPP using a 10-y window
-      #maxA <- by(picusOutputsSp$anpp, picusOutputsSp$landtype, function(x) max(runmean(x, k=10, endrule="NA", align="center"), na.rm=TRUE))#, na.rm=TRUE) 
+      maxA <- by(picusOutputsSp$anpp, picusOutputsSp$landtype, function(x) max(runmean(x, k=10, endrule="NA", align="center"), na.rm=TRUE))#, na.rm=TRUE) 
       
       ### method 3 - using average NPP before first peak 
-      maxA <- by(picusOutputsSp$anpp, picusOutputsSp$landtype, function(x) mean(x[1:which(x==max(x, na.rm=TRUE))], na.rm=TRUE))#, na.rm=TRUE) ## 
+      #maxA <- by(picusOutputsSp$anpp, picusOutputsSp$landtype, function(x) mean(x[1:which(x==max(x, na.rm=TRUE))], na.rm=TRUE))#, na.rm=TRUE) ## 
       
       ## Unit conversion, rounding, and storing
       maxA <- maxA*unitConvertionFactor #unit conversion

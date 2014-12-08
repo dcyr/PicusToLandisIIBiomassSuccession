@@ -13,6 +13,10 @@ readDir <- ifelse(Sys.info()["sysname"]=="Linux",
                   paste("/media/dcyr/Windows7_OS/Dropbox/landis/SCF_IA_LANDIS"),
                   paste("C:/Dropbox/Landis/SCF_IA_LANDIS"))  ### read-only folder, on my laptop (windows or Linux)
 
+wwd <- paste(readDir, "Picus", sep="/")
+wwd <- paste(wwd, Sys.Date(), sep="/")
+dir.create(wwd)
+
 vegCodes <- read.csv(file=paste(readDir, "vegCodes.csv", sep="/"))
 ######################
 ######################
@@ -130,8 +134,7 @@ picusOutputsDF[,"period"] <- as.factor(picusOutputsDF[,"period"])
 picusOutputsDF[,"landtype"] <- as.factor(picusOutputsDF[,"landtype"])
 picusOutputsDF[,"species"] <- as.factor(picusOutputsDF[,"species"])
 
-wwd <- paste(readDir, "Picus", sep="/")
-dir.create(wwd)
+
 write.csv(picusOutputsDF, paste(wwd, "picusOutputsDF.csv", sep="/"), row.names=FALSE)
 
 

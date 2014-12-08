@@ -24,22 +24,26 @@ dir.create(wwd)
 
 
 #### configuration of landis Climate Change scenarios
-landisCCScenarios <- list(RCP85 = list("0" = c("Baseline", "Baseline"),
-                                       "10" = c("RCP85", "20112040"),
-                                       "40" = c("RCP85", "20412070"),
-                                       "70" = c("RCP85", "20712100")),
-                          RCP45 = list("0" = c("Baseline", "Baseline"),
-                                       "10" = c("RCP85", "20112040"),
-                                       "40" = c("RCP85", "20412070"),
-                                       "70" = c("RCP45", "20712100"))
-)
+landisCCScenarios <- list(BaselineOnly = list("0" = c("Baseline", "Baseline")))
+
+# landisCCScenarios <- list(RCP85 = list("0" = c("Baseline", "Baseline"),
+#                                        "10" = c("RCP85", "20112040"),
+#                                        "40" = c("RCP85", "20412070"),
+#                                        "70" = c("RCP85", "20712100")),
+#                           RCP45 = list("0" = c("Baseline", "Baseline"),
+#                                        "10" = c("RCP85", "20112040"),
+#                                        "40" = c("RCP85", "20412070"),
+#                                        "70" = c("RCP45", "20712100"))
+#)
 
 
 
 #### assembling parameter table according to landis format
 growthParam <- get(load(paste(processedDir,"growthParam.RData", sep="/")))
-pEst <- get(load(paste(processedDir,"pEst.RData", sep="/")))
+SEP <- get(load(paste(processedDir,"SEP.RData", sep="/")))
 biomassSuccessionDynamicParams <- list()
+
+
 
 for (i in seq_along(landisCCScenarios)){# i <- 1
   y <- as.numeric(names(landisCCScenarios[[i]]))
@@ -49,11 +53,11 @@ for (i in seq_along(landisCCScenarios)){# i <- 1
     
     maxBiomass <- as.data.frame(growthParam[[s]][[p]][["maxBiomass"]])
     maxANPP <- as.data.frame(growthParam[[s]][[p]][["maxANPP"]])
-    SEP <- as.data.frame(pEst[[s]][[p]])
+    pEst <- as.data.frame(SEP[[s]][[p]])
     spp <- rep(rownames(maxBiomass), ncol(maxANPP))
     maxBiomass <- stack(maxBiomass)
     maxANPP <- stack(maxANPP)
-    SEP <- stack(SEP)
+    pEst <- stack(pEst)
     
     maxBiomass[is.na(maxBiomass)] <- 0
     maxANPP[is.na(maxANPP)] <- 0
@@ -63,7 +67,7 @@ for (i in seq_along(landisCCScenarios)){# i <- 1
     paramsTmp <- data.frame(year = rep(y[j], length(spp)),
                             landtype= maxBiomass$ind,
                             species = spp,
-                            probEst = SEP$values,  ##### "probEst" To Be Attributed 
+                            probEst = pEst$values,  ##### "probEst" To Be Attributed 
                             maxANPP = round(maxANPP$values, 0), 
                             maxB = round(maxBiomass$values, 0))
     if(exists("params")) {

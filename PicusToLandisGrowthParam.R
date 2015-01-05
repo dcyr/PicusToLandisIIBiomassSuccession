@@ -56,7 +56,7 @@ for (s in levels(picusOutputsDF$scenario)) { ## beginning of scenario loop   # s
                          select=c("period", "landtype", "species", "Year", "BiomassAbove_kg_ha", "anpp"))
   picusOutputs <- droplevels(picusOutputs)
   
-  for (p in levels(picusOutputs$period)) { ## beginning of period loop   #  p<- "Baseline 
+  for (p in levels(picusOutputs$period)) { ## beginning of period loop   #  p<- "Baseline" 
     ## creating matrices filled with zeros
     maxBiomass <- maxANPP <- matrix(0, nrow=length(spp), ncol=length(landtypes), dimnames=list(spp_landis, landtypes))
     ## subsetting for the current species
@@ -64,7 +64,7 @@ for (s in levels(picusOutputsDF$scenario)) { ## beginning of scenario loop   # s
                           subset= picusOutputsDF$scenario == s & picusOutputsDF$period == p,
                           select=c("landtype", "species", "Year", "BiomassAbove_kg_ha", "anpp"))
     
-    for (sp in seq_along(spp)) { ## beginning of species loop    # sp <- 8
+    for (sp in seq_along(spp)) { ## beginning of species loop    # sp <- 3
       ## subsetting for the current species
       picusOutputsSp <- picusOutputs[picusOutputs$species==spp[sp],]
       

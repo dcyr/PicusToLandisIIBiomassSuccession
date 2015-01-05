@@ -12,7 +12,7 @@ rm(list=ls())
 readDir <- ifelse(Sys.info()["sysname"]=="Linux",
                   paste("/media/dcyr/Windows7_OS/Dropbox/landis/SCF_IA_LANDIS"),
                   paste("C:/Dropbox/Landis/SCF_IA_LANDIS"))  ### read-only folder, on my laptop (windows or Linux)
-
+picusOutputDir <- "C:/Travail/SCF/Landis/Picus/Outputs"
 wwd <- paste(readDir, "Picus", sep="/")
 wwd <- paste(wwd, Sys.Date(), sep="/")
 dir.create(wwd)
@@ -26,20 +26,25 @@ vegCodes <- read.csv(file=paste(readDir, "vegCodes.csv", sep="/"))
 ######################
 ##### The following section, including the big loop, is dependent on a specific file structure (PICUS outputs produced by Anthony Taylor)
 ############
-folderNames <- list.dirs(paste(readDir, "Picus/Outputs", sep="/"), full.names=F, recursive=F)
+folderNames <- list.dirs(picusOutputDir, full.names=F, recursive=F)
+#### subsample of folderNames
+folderNames <- folderNames[grep("BSE", folderNames)]#"AM|BSE"
 outputInfo <- strsplit(folderNames, "_")
-folderNames <- paste(readDir, "Picus/Outputs", folderNames, sep="/")
+folderNames <- paste(picusOutputDir, folderNames, sep="/")
 
-area <- unique(rapply(outputInfo, function(x) x[2]))
-scenarios <- unique(rapply(outputInfo, function(x) x[3]))
-periods <- unique(rapply(outputInfo, function(x) x[4]))
+
+
+
+area <- unique(rapply(outputInfo, function(x) x[1]))
+scenarios <- unique(rapply(outputInfo, function(x) x[2]))
+periods <- unique(rapply(outputInfo, function(x) x[3]))
 
 ######################
 ######### This big loop read all csv files and gather information into a big dataframe
 require(stringr) 
 #############
 picusOutputs <- list()
-for (a in area) {
+for (a in area) { #a <- area[1]
   picusOutputs[[a]] <- list()
 
   landtypeCodes <- read.csv(file=paste(readDir, "/", "landtypeCodes", area, ".csv", sep=""))  
@@ -47,9 +52,9 @@ for (a in area) {
   
   spp <- vegCodes[vegCodes[,a]==1,"PICUS_name"]
  
-  for (i in seq_along(folderNames)) {
+  for (i in seq_along(folderNames)) { # i <- 1
     
-    s <- outputInfo[[i]][3]  ### nome of scenario
+    s <- outputInfo[[i]][2]  ### nome of scenario
     p <- outputInfo[[i]][length(outputInfo[[i]])] ## name of period
     
     #### creation of lists where dataframes are stored
@@ -64,7 +69,7 @@ for (a in area) {
 
       
       #### fetching .csv files
-      x <- list.files(paste(folderNames[i], sep="/"))
+      x <- list.files(folderNames[i])
       sppIndex <- grep(sp, x)
 
         
@@ -136,7 +141,6 @@ picusOutputsDF[,"species"] <- as.factor(picusOutputsDF[,"species"])
 
 
 write.csv(picusOutputsDF, paste(wwd, "picusOutputsDF.csv", sep="/"), row.names=FALSE)
-
 
 
   

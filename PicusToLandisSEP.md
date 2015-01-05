@@ -28,7 +28,30 @@ summary(picusOutputsDF)
 ```
 
 ```
-## Error: erreur d'évaluation de l'argument 'object' lors de la sélection d'une méthode pour la fonction 'summary' : Error: object 'picusOutputsDF' not found
+##  ecozone           scenario            period           landtype      
+##  BSE:2242154   Baseline: 324203   20112040: 383392   4234   :  28785  
+##                RCP26   : 383963   20412070: 383584   4254   :  28782  
+##                RCP45   : 383876   20712100:1150975   4255   :  28781  
+##                RCP85   :1150112   Baseline: 324203   4263   :  28768  
+##                                                      4265   :  28762  
+##                                                      4235   :  28761  
+##                                                      (Other):2069515  
+##                 species             Year      BiomassAbove_kg_ha
+##  Pinus_banksiana    : 144000   Min.   :2000   Min.   :     0    
+##  Picea_glauca       : 143995   1st Qu.:2075   1st Qu.: 47461    
+##  Populus_tremuloides: 143995   Median :2150   Median : 93860    
+##  Betula_papyrifera  : 143991   Mean   :2150   Mean   : 88011    
+##  Picea_mariana      : 143755   3rd Qu.:2225   3rd Qu.:119416    
+##  Abies_balsamea     : 143709   Max.   :2299   Max.   :446763    
+##  (Other)            :1378709                                    
+##  DiedBiomassAbove_kg      anpp       
+##  Min.   :    0       Min.   : -9275  
+##  1st Qu.: 2393       1st Qu.:  2230  
+##  Median : 3751       Median :  3932  
+##  Mean   : 3952       Mean   :  4232  
+##  3rd Qu.: 5228       3rd Qu.:  5563  
+##  Max.   :36446       Max.   :123461  
+## 
 ```
 
 ### Seconday input
@@ -39,7 +62,20 @@ head(vegCodes)  ### first lines of table 'vegCodes.csv'
 ```
 
 ```
-## Error: erreur d'évaluation de l'argument 'x' lors de la sélection d'une méthode pour la fonction 'head' : Error: object 'vegCodes' not found
+##   Code      Common.name                    Scientific.name Farrar.1995.
+## 1  100           Spruce                              Picea           95
+## 2  101     Black spruce          Picea mariana (Mill.) BSP          106
+## 3  102       Red spruce                 Picea rubens Sarg.          104
+## 4  103  Norway spruce *            Picea abies (L.) Karst.          108
+## 5  104 Engelmann spruce Picea engelmannii Parry ex Engelm.          100
+## 6  105     White spruce         Picea glauca (Moench) Voss          102
+##   Life.form Code_LANDIS Veg_rep    PICUS_name BSE
+## 1      <NA>        <NA>      NA          <NA>   0
+## 2     ST-MT    PICE.MAR       0 Picea_mariana   1
+## 3        MT    PICE.RUB       0  Picea_rubens   0
+## 4        LT        <NA>      NA          <NA>   0
+## 5 LT (-VLT)    PICE.ENG       0          <NA>   0
+## 6        MT    PICE.GLA       0  Picea_glauca   1
 ```
 
 

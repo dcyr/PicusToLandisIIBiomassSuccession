@@ -126,3 +126,4 @@ mat <- t(cbind(landtypes,
                 landtypes,
                 600))
 write.csv(mat, "shadeMatrix.csv", row.names = FALSE)
+###

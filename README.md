@@ -1,6 +1,6 @@
-# README.md
+# Picus outputs to LANDIS-II Biomass Succession dynamic inputs
 Dominic Cyr  
-Thursday, November 27, 2014  
+Updated on May 24 2015
 
 # General description
 

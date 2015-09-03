@@ -1,26 +1,21 @@
 ######################
 ######################
 #######
-#######   Exploration of Spp Establishment' sensitivity to climate
+#######   Computation of Species Establishment Probabilities for Landis-II Biomass succession
+#######   from formatted Picus outputs
 #######   Dominic Cyr
 #######
 #####################
 ######################
 rm(list=ls())
 
-picusOutputDir <- ifelse(Sys.info()["sysname"]=="Linux",
-                         "/media/dcyr/Windows7_OS/Travail/SCF/Landis/Picus/Outputs",
-                         "C:/Travail/SCF/Landis/Picus/Outputs")
+processedOutputDir <- ifelse(Sys.info()["sysname"]=="Linux",
+                             "/media/dcyr/Windows7_OS/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession",
+                             "C:/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession")
 
-### setting working directory, assuming that the picus Data frame was created the same day
-### otherwise,
-setwd(picusOutputDir)
-setwd("..")
-wwd <- paste(getwd(), Sys.Date(), sep="/")
-dir.create(wwd)
-setwd(wwd)
-rm(wwd)
-readDir <- getwd() ###  may be changed if the dataframe was created another day
+### That assumes Picus outputs were processed on the same day
+### (else, specify another folder containing formated Picus outputs)
+setwd(paste(processedOutputDir, Sys.Date(), sep="/"))
 
 
 ### vegCodes is the species master list
@@ -30,53 +25,63 @@ readURL <- "https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/
 vegCodes <- read.csv(text = getURL(paste(readURL, "vegCodes.csv", sep="/")))
 ######################
 ######################
+############
+x <- list.files(full.names=F)
+x <- x[grep("picusOutputsDF_", x)]
+#### subsample of folderNames
+#folderNames <- folderNames[grep("Acadian", folderNames)]#"AM|BSE|BSW|BP"
+areas <- unique(gsub("picusOutputsDF_|.csv", "", x))
 
-######################
-picusOutputsDF <- read.csv(paste(readDir, "picusOutputsDF.csv", sep="/"))  ### this .csv file is produced by
-picusOutputsDF$landtype <- as.factor(picusOutputsDF$landtype)
-######################
 
-attach(picusOutputsDF)
+for (a in areas) { # a <- areas[1]
 
-landtypes <- levels(landtype)
-spp <- levels(species)
-spp_landis <- character()
-for (sp in spp) {
-  spp_landis <- append(spp_landis, as.character(vegCodes[which(vegCodes$picusName ==sp), "LandisCode"]))
-}
+    ######################
+    picusOutputsDF <- read.csv(paste0("picusOutputsDF_", a, ".csv"))  ### this .csv file is produced by
+    picusOutputsDF$landtype <- as.factor(picusOutputsDF$landtype)
+    ######################
 
-#################
-########  The following loop creates matrices of time necessary for the first accumulation of biomass in each
-########  combination of spp and landtypes. We consider using this as a proxy for setting  Species Establishment Probabilities.
-#################
+    attach(picusOutputsDF)
 
-timeBeforeBiomass <- pEst <- list()
-
-for (s in levels(picusOutputsDF$scenario)){
-  xS <- subset(picusOutputsDF, subset=picusOutputsDF$scenario==s)
-  xS <- droplevels(xS)
-  timeBeforeBiomass[[s]] <- list()
-  for (p in levels(xS$period)) {
-    xP <- subset(xS, subset=xS$period==p)
-    xP <- droplevels(xP)
-    timeBeforeBiomass[[s]][[p]] <- pEst[[s]][[p]] <- matrix(NA, nrow=length(spp), ncol=length(landtypes), dimnames=list(spp_landis, landtypes))
-    for (l in landtypes) {
-      xL <- subset(xP, subset=xP$landtype==l)
-      for (sp in seq_along(spp)) {
-        x <- subset(xL, subset=xL$species==spp[sp])
-        timeBeforeBiomass[[s]][[p]][spp_landis[sp], l] <- x[min(which(x$BiomassAbove_kg_ha>0)), "Year"] - 2000
-        print(paste(s, p, l, spp_landis[sp]))
-      }
+    landtypes <- levels(landtype)
+    spp <- levels(species)
+    spp_landis <- character()
+    for (sp in spp) {
+        spp_landis <- append(spp_landis, as.character(vegCodes[which(vegCodes$picusName ==sp), "LandisCode"]))
     }
-  prob <- round(pbinom(q=0, size=10, prob=1/timeBeforeBiomass[[s]][[p]], lower.tail=FALSE), 3)
-  prob[is.na(prob)] <- 0
-  pEst[[s]][[p]] <- prob
-  #write.csv(timeBeforeBiomass[[s]][[p]], file=paste("timeBeforeBiomass_", s,"_", p, ".csv", sep=""))
-  #write.csv(prob, file=paste("pEst_", s,"_", p, ".csv", sep=""))
-  }
-}
-save(pEst, file="sep.RData")
 
+    #################
+    ########  The following loop creates matrices of time necessary for the first accumulation of biomass in each
+    ########  combination of spp and landtypes. We consider using this as a proxy for setting  Species Establishment Probabilities.
+    #################
+
+    timeBeforeBiomass <- pEst <- list()
+
+    for (s in levels(picusOutputsDF$scenario)){
+        xS <- subset(picusOutputsDF, subset=picusOutputsDF$scenario==s)
+        xS <- droplevels(xS)
+        timeBeforeBiomass[[s]] <- list()
+        for (p in levels(xS$period)) {
+            xP <- subset(xS, subset=xS$period==p)
+            xP <- droplevels(xP)
+            timeBeforeBiomass[[s]][[p]] <- pEst[[s]][[p]] <- matrix(NA, nrow=length(spp), ncol=length(landtypes), dimnames=list(spp_landis, landtypes))
+            for (l in landtypes) {
+                xL <- subset(xP, subset=xP$landtype==l)
+                for (sp in seq_along(spp)) {
+                    x <- subset(xL, subset=xL$species==spp[sp])
+                    timeBeforeBiomass[[s]][[p]][spp_landis[sp], l] <- x[min(which(x$BiomassAbove_kg_ha>0)), "Year"] - 2000
+                    print(paste(a, s, p, l, spp_landis[sp]))
+                }
+            }
+            prob <- round(pbinom(q=0, size=10, prob=1/timeBeforeBiomass[[s]][[p]], lower.tail=FALSE), 3)
+            prob[is.na(prob)] <- 0
+            pEst[[s]][[p]] <- prob
+            #write.csv(timeBeforeBiomass[[s]][[p]], file=paste("timeBeforeBiomass_", s,"_", p, ".csv", sep=""))
+            #write.csv(prob, file=paste("pEst_", s,"_", p, ".csv", sep=""))
+        }
+    }
+    save(pEst, file=paste0("sep_", a, ".RData"))
+    rm(pEst)
+}
 
 # ##########
 # ### Optional output

@@ -78,7 +78,8 @@ for (a in areas) {
             maxBiomass[is.na(maxBiomass)] <- 0
             maxANPP[is.na(maxANPP)] <- 0
 
-            maxBiomass$ind <- as.factor(paste(substr(maxBiomass$ind, 1,3), substr(maxBiomass$ind, 4,4), sep="_") )
+            maxBiomass$ind <- as.factor(paste(substr(maxBiomass$ind, 1,3),
+                                              substr(maxBiomass$ind, 4,4), sep="_") )
 
             paramsTmp <- data.frame(year = rep(ifelse(j==1, y[j], y[j]+10), length(spp)),
                             landtype= maxBiomass$ind,
@@ -127,7 +128,8 @@ for (a in areas) {
 # x <- biomassSuccessionDynamicParams[[i]]
 # landtypes <- unique(as.character(x$landtype))
 # mat <- t(cbind(landtypes,
-#                 matrix(c("20%", "40%", "50%", "70%", "90%"), byrow=TRUE, ncol=5, nrow=length(landtypes)),
+#              matrix(c("20%", "40%", "50%", "70%", "90%"),
+                    # byrow=TRUE, ncol=5, nrow=length(landtypes)),
 #                 1,
 #                 landtypes,
 #                 600))

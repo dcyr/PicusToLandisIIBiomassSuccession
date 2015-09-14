@@ -33,7 +33,7 @@ x <- x[grep("picusOutputsDF_", x)]
 areas <- unique(gsub("picusOutputsDF_|.csv", "", x))
 
 
-for (a in areas) { # a <- areas[1]
+for (a in areas) { # a <- areas[5]
 
     ######################
     picusOutputsDF <- read.csv(paste0("picusOutputsDF_", a, ".csv"))  ### this .csv file is produced by
@@ -44,10 +44,18 @@ for (a in areas) { # a <- areas[1]
 
     landtypes <- levels(landtype)
     spp <- levels(species)
-    spp_landis <- character()
+
+    spp_landis <- vegCodes[which(vegCodes[,a]==TRUE), "LandisCode"]
+    spp_landis <- droplevels(spp_landis)
+    spp_landis <- spp_landis[order(spp_landis)]
+
+    ### spp list, some species in Landis use the same Picus reference (ex. Populus spp)
+    tmp <- list()
     for (sp in spp) {
-        spp_landis <- append(spp_landis, as.character(vegCodes[which(vegCodes$picusName ==sp), "LandisCode"]))
+        tmp[[sp]] <- as.character(vegCodes[intersect(which(vegCodes$picusRef == sp),
+                                                     which(vegCodes[,a] == 1)), "LandisCode"])
     }
+    spp <- tmp
 
     #################
     ########  The following loop creates matrices of time necessary for the first accumulation of biomass in each
@@ -63,13 +71,18 @@ for (a in areas) { # a <- areas[1]
         for (p in levels(xS$period)) {
             xP <- subset(xS, subset=xS$period==p)
             xP <- droplevels(xP)
-            timeBeforeBiomass[[s]][[p]] <- pEst[[s]][[p]] <- matrix(NA, nrow=length(spp), ncol=length(landtypes), dimnames=list(spp_landis, landtypes))
+            timeBeforeBiomass[[s]][[p]] <- pEst[[s]][[p]] <- matrix(NA, nrow=length(spp_landis),
+                                                                    ncol=length(landtypes),
+                                                                    dimnames=list(spp_landis, landtypes))
             for (l in landtypes) {
                 xL <- subset(xP, subset=xP$landtype==l)
                 for (sp in seq_along(spp)) {
-                    x <- subset(xL, subset=xL$species==spp[sp])
-                    timeBeforeBiomass[[s]][[p]][spp_landis[sp], l] <- x[min(which(x$BiomassAbove_kg_ha>0)), "Year"] - 2000
-                    print(paste(a, s, p, l, spp_landis[sp]))
+                    picusRef <- names(spp)[sp]
+                    x <- subset(xL, subset=xL$species == picusRef)
+                    for (i in spp[[sp]]) {
+                        timeBeforeBiomass[[s]][[p]][i, l] <- x[min(which(x$BiomassAbove_kg_ha>0)), "Year"] - 2000
+                        print(paste(a, s, p, l, spp_landis[sp]))
+                    }
                 }
             }
             prob <- round(pbinom(q=0, size=10, prob=1/timeBeforeBiomass[[s]][[p]], lower.tail=FALSE), 3)

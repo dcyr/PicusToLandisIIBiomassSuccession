@@ -7,15 +7,9 @@
 #######
 #######   Dominic Cyr
 #######
-#####################
 ######################
 ######################
-######################
-#######
-#######   Computation of Species Establishment Probabilities for Landis-II Biomass succession
-#######   from formatted Picus outputs
-#######   Dominic Cyr
-#######
+
 #####################
 ######################
 rm(list=ls())
@@ -45,7 +39,7 @@ areas <- unique(gsub("picusOutputsDF_|.csv", "", x))
 
 
 ####################
-for (a in areas) {
+for (a in areas) {# a <- areas[1]
     ######################
     picusOutputsDF <- read.csv(paste0("picusOutputsDF_", a, ".csv"))  ### this .csv file is produced by
     picusOutputsDF$landtype <- as.factor(picusOutputsDF$landtype)
@@ -62,10 +56,17 @@ for (a in areas) {
     ##### preparing the loops (another loop could be added to process multiple simulation areas
     landtypes <- levels(picusOutputsDF$landtype)
     spp <- levels(picusOutputsDF$species)
-    spp_landis <- character()
+    spp_landis <- vegCodes[which(vegCodes[,a]==TRUE), "LandisCode"]
+    spp_landis <- droplevels(spp_landis)
+    spp_landis <- spp_landis[order(spp_landis)]
+
+    ### spp list, some species in Landis use the same Picus reference (ex. Populus spp)
+    tmp <- list()
     for (sp in spp) {
-      spp_landis <- append(spp_landis, as.character(vegCodes[which(vegCodes$picusName ==sp), "LandisCode"]))
+        tmp[[sp]] <- as.character(vegCodes[intersect(which(vegCodes$picusRef == sp),
+                                                      which(vegCodes[,a] == 1)), "LandisCode"])
     }
+    spp <- tmp
 
     ##### beginning of loops (another loop could be added to process multiple simulation areas)
     growthParam <- list()
@@ -80,61 +81,68 @@ for (a in areas) {
 
       for (p in levels(picusOutputs$period)) { ## beginning of period loop   #  p<- "Baseline"
         ## creating matrices filled with zeros
-        maxBiomass <- maxANPP <- matrix(0, nrow=length(spp), ncol=length(landtypes), dimnames=list(spp_landis, landtypes))
+        maxBiomass <- maxANPP <- matrix(0, nrow=length(spp_landis), ncol=length(landtypes), dimnames=list(spp_landis, landtypes))
         ## subsetting for the current species
         picusOutputs <- subset(picusOutputsDF,
                               subset= picusOutputsDF$scenario == s & picusOutputsDF$period == p,
                               select=c("landtype", "species", "Year", "BiomassAbove_kg_ha", "anpp"))
 
         for (sp in seq_along(spp)) { ## beginning of species loop    # sp <- 3
-          ## subsetting for the current species
-          picusOutputsSp <- picusOutputs[picusOutputs$species==spp[sp],]
 
-          ###############
-          ######## computing and storing max Biomass
-          ###############
+            picusRef <- names(spp)[sp]
+            ## subsetting for the current species
+            picusOutputsSp <- picusOutputs[picusOutputs$species==picusRef,]
 
-          #######
-          ### old method
-          #######
-          ### extracting maxBiomass using peak biomass
-          ##maxB <- by(picusOutputsSp$BiomassAbove_kg_ha, picusOutputsSp$landtype, max, na.rm=TRUE)
+            ###############
+            ######## computing and storing max Biomass
+            ###############
 
-          #######
-          ### new method
-          #######
-          #### Extracting max biomass using the average around which biomass oscillate after peak biomass, generally after 100 years post establishment
-          subsample <- which(picusOutputsSp$Year>=2100)  ### year after which
-          maxB <- by(picusOutputsSp[subsample, "BiomassAbove_kg_ha"], picusOutputsSp[subsample, "landtype"], mean, na.rm=TRUE)
+            #######
+            ### old method
+            #######
+            ### extracting maxBiomass using peak biomass
+            ##maxB <- by(picusOutputsSp$BiomassAbove_kg_ha, picusOutputsSp$landtype, max, na.rm=TRUE)
 
+            #######
+            ### new method
+            #######
+            #### Extracting max biomass using the average around which biomass oscillate after peak biomass, generally after 100 years post establishment
+            subsample <- which(picusOutputsSp$Year>=2100)  ### year after which
+            maxB <- by(picusOutputsSp[subsample, "BiomassAbove_kg_ha"], picusOutputsSp[subsample, "landtype"], mean, na.rm=TRUE)
 
-          ## Unit conversion, rounding, and storing
-          maxB <- maxB*unitConvertionFactor  #unit conversion
-          maxBiomass[spp_landis[sp], names(maxB)] <- round(as.numeric(maxB))
-          ###############
-          ###############
+            ## Unit conversion, rounding, and storing
+            maxB <- maxB*unitConvertionFactor  #unit conversion
 
-          ###############
-          ######## computing and storing max ANPP
-          ###############
-          ######## Only one method should be commented out.
+            ###############
+            ###############
 
-          ### method 1 - using max instant NPP
-          #maxA <- by(picusOutputsSp$anpp, picusOutputsSp$landtype, max, na.rm=TRUE)  ### old method, no smoothing => max instant.ANPP
+            ###############
+            ######## computing and storing max ANPP
+            ###############
+            ######## Only one method should be commented out.
 
-          ### method 2 - smoothing ANPP using a 10-y window
-          maxA <- by(picusOutputsSp$anpp, picusOutputsSp$landtype, function(x) max(runmean(x, k=10, endrule="NA", align="center"), na.rm=TRUE))#, na.rm=TRUE)
+            ### method 1 - using max instant NPP
+            #maxA <- by(picusOutputsSp$anpp, picusOutputsSp$landtype, max, na.rm=TRUE)  ### old method, no smoothing => max instant.ANPP
 
-          ### method 3 - using average NPP before first peak
-          #maxA <- by(picusOutputsSp$anpp, picusOutputsSp$landtype, function(x) mean(x[1:which(x==max(x, na.rm=TRUE))], na.rm=TRUE))#, na.rm=TRUE) ##
+            ### method 2 - smoothing ANPP using a 10-y window
+            maxA <- by(picusOutputsSp$anpp, picusOutputsSp$landtype, function(x) max(runmean(x, k=10, endrule="NA", align="center"), na.rm=TRUE))#, na.rm=TRUE)
 
-          ## Unit conversion, rounding, and storing
-          maxA <- maxA*unitConvertionFactor #unit conversion
-          maxANPP[spp_landis[sp], names(maxA)] <- round(as.numeric(maxA))
+            ### method 3 - using average NPP before first peak
+            #maxA <- by(picusOutputsSp$anpp, picusOutputsSp$landtype, function(x) mean(x[1:which(x==max(x, na.rm=TRUE))], na.rm=TRUE))#, na.rm=TRUE) ##
+
+            ## Unit conversion, rounding, and storing
+            maxA <- maxA*unitConvertionFactor #unit conversion
+
+            for (i in spp[[sp]]) {
+                maxBiomass[i, names(maxB)] <- round(as.numeric(maxB))
+                maxANPP[i, names(maxA)] <- round(as.numeric(maxA))
+                print(paste(a, s, p, i))
+            }
         }
 
         growthParam[[s]][[p]][["maxBiomass"]] <- maxBiomass
         growthParam[[s]][[p]][["maxANPP"]] <- maxANPP
+
         #####
         ### Optional: comment this out to produce .csv files
         #####

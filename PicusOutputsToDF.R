@@ -45,7 +45,7 @@ folderNames <- paste(picusOutputDir, folderNames, sep="/")
 ### to compute parameters for all areas, use this:
 #areas <- unique(rapply(outputInfo, function(x) x[1]))
 ### else, comment out previous line and specify which one(s) to compute
-areas <- c("LSJ")
+areas <- c("WestON")
 
 scenarios <- unique(rapply(outputInfo, function(x) x[2]))
 periods <- unique(rapply(outputInfo, function(x) x[3]))
@@ -60,7 +60,7 @@ for (a in areas) { #a <- areas[1]
 
     folderArea <- folderNames[grep(a, folderNames)]
 
-    spp <- vegCodes[vegCodes[,a]==1,"picusName"]
+    spp <- unique(vegCodes[vegCodes[,a]==1,"picusRef"])
 
     for (i in seq_along(folderArea)) { # i <- 1
 
@@ -75,7 +75,7 @@ for (a in areas) { #a <- areas[1]
         ####
         x <- list.files(folderArea[i])
 
-        for (sp in as.character(spp)) { # sp <- as.character(spp[1])
+        for (sp in as.character(spp)) { # sp <- as.character(spp[9])
 
             #### fetching .csv files
             sppIndex <- grep(sp, x)

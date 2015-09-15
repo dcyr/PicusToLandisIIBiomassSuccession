@@ -82,3 +82,11 @@ More details about those parameters, how the participate to succession as simula
 [9]: http://github.com/dcyr/Landis-II-SCF/blob/master/PicusToLandisGrowthParam.md
 [10]: http://github.com/dcyr/Landis-II-SCF/blob/master/PicusToLandisAssembly.R
 [11]: http://github.com/dcyr/Landis-II-SCF/blob/master/PicusToLandisAssembly.md
+[12]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_Acadian.md
+[13]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_AM.md
+[14]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_BSE.md
+[15]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_BSW.md
+[16]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_BP.md
+[17]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_MC.md
+[18]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_LSJ.md
+[19]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_WestON.md

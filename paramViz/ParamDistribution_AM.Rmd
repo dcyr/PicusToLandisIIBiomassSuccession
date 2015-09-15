@@ -63,9 +63,8 @@ Much of the succession dynamics simulated by LANDIS-II depends from those values
 ### Picus raw outputs
 
 
-The following figure illustrates Picus outputs for each species and all land types. The parameter values illustrated above are directly derived from those simulation outputs, and translated into 
+The following figure illustrates Picus outputs for each species and all land types. The parameter values illustrated above are directly derived from these simulation outputs. More details available [here](https://github.com/dcyr/PicusToLandisIIBiomassSuccession)
 
-More details available [here](https://github.com/dcyr/PicusToLandisIIBiomassSuccession)
 
 Simulations are started from bare ground, allowing only one species at the time and are ran for 250 years.
 

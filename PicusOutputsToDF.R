@@ -45,7 +45,7 @@ folderNames <- paste(picusOutputDir, folderNames, sep="/")
 ### to compute parameters for all areas, use this:
 #areas <- unique(rapply(outputInfo, function(x) x[1]))
 ### else, comment out previous line and specify which one(s) to compute
-areas <- c("WestON")
+areas <- c("MC")
 
 scenarios <- unique(rapply(outputInfo, function(x) x[2]))
 periods <- unique(rapply(outputInfo, function(x) x[3]))

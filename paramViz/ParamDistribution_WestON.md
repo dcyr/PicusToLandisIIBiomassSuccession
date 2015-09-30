@@ -1,6 +1,6 @@
 # Picus to Landis-II Biomass Succession - Western Ontario
 Dominic cyr  
-Updated on Sep 15 2015
+Updated on Sep 30 2015
 
 -------
 
@@ -16,9 +16,9 @@ Updated on Sep 15 2015
 
 ### Landis-II - Biomass succession - Dynamic inputs
 
-The following three figures show how parameter values derived from Picus outputs are distributed among land types for maximum aboveground biomass (**maxAGB**), maximum annual net primary productivity (**maxANPP**), and species establishment probabilities (**SEP**) are distributed. Those parameters are called *dynamic inputs* because they can vary through the course of one simulation, to account for the effect of climate change, for instance.
+The following three figures show how parameter values derived from Picus outputs are distributed among land types for maximum aboveground biomass (**maxAGB**), maximum annual net primary productivity (**maxANPP**), and species establishment probabilities (**SEP**). Those parameters are called *dynamic inputs* because they can vary through the course of one simulation, to account for the effect of climate change, for instance.
 
-Much of the succession dynamics simulated by LANDIS-II depends from those values, in interaction with landscape configuration, initial conditions, disturbances and static species parameters such as longevity, seed dispersal distances, etc.
+Much of the succession dynamics simulated by LANDIS-II depends on those values, in interaction with landscape configuration, initial conditions, disturbances and static species parameters such as longevity, seed dispersal distances, etc.
 
 -------
 

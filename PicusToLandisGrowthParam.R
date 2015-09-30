@@ -34,7 +34,6 @@ vegCodes <- read.csv(text = getURL(paste(readURL, "vegCodes.csv", sep="/")))
 x <- list.files(full.names=F)
 x <- x[grep("picusOutputsDF_", x)]
 #### subsample of folderNames
-#folderNames <- folderNames[grep("Acadian", folderNames)]#"AM|BSE|BSW|BP"
 areas <- unique(gsub("picusOutputsDF_|.csv", "", x))
 
 

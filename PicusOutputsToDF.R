@@ -89,28 +89,28 @@ for (a in areas) { #a <- areas[1]
                 time1 <- Sys.time()
                 standTmp <- read.csv(paste(folderArea[i], sppStand[j], sep="/"))
                 if (nrow(standTmp)!=0)  {
-                deadwoodTmp <- read.csv(paste(folderArea[i], sppDeadwood[j], sep="/"))
-                standTmp <- standTmp[,c("Year","BiomassAbove_kg_ha")]
-                deadwoodTmp <- deadwoodTmp[,c("Year","DiedBiomassAbove_kg")]
+                    deadwoodTmp <- read.csv(paste(folderArea[i], sppDeadwood[j], sep="/"))
+                    standTmp <- standTmp[,c("Year","BiomassAbove_kg_ha")]
+                    deadwoodTmp <- deadwoodTmp[,c("Year","DiedBiomassAbove_kg")]
 
-                tmp <- merge(standTmp, deadwoodTmp, by = "Year", all.x=TRUE)
-                tmp[is.na(tmp[,"DiedBiomassAbove_kg"]), "DiedBiomassAbove_kg"] <- 0
-                tmp[,"anpp"] <- diff(c(0,tmp[,"BiomassAbove_kg_ha"])) + tmp[,"DiedBiomassAbove_kg"]   #### ici je dois vérifier si les valeurs simulées correspondent à l'état au début ou à la fin du pas de temps
-                ###############################################
-                #################
-                landtype  <- str_extract(sppStand[j], "[0-9]+")
-                tmp[,"landtype"] <- landtype
-                tmp[,"species"] <- sp
-                tmp[,"ecozone"] <- a
-                tmp[,"scenario"] <- s
-                tmp[,"period"] <- p
+                    tmp <- merge(standTmp, deadwoodTmp, by = "Year", all.x=TRUE)
+                    tmp[is.na(tmp[,"DiedBiomassAbove_kg"]), "DiedBiomassAbove_kg"] <- 0
+                    tmp[,"anpp"] <- diff(c(0,tmp[,"BiomassAbove_kg_ha"])) + tmp[,"DiedBiomassAbove_kg"]   #### ici je dois vérifier si les valeurs simulées correspondent à l'état au début ou à la fin du pas de temps
+                    ###############################################
+                    #################
+                    landtype  <- str_extract(sppStand[j], "[0-9]+")
+                    tmp[,"landtype"] <- landtype
+                    tmp[,"species"] <- sp
+                    tmp[,"ecozone"] <- a
+                    tmp[,"scenario"] <- s
+                    tmp[,"period"] <- p
 
-                if(exists("picusDF")) {
-                    picusDF <- rbind(picusDF, tmp)
-                } else {
-                    picusDF <- tmp
-                }
-                time2 <- Sys.time()
+                    if(exists("picusDF")) {
+                        picusDF <- rbind(picusDF, tmp)
+                    } else {
+                        picusDF <- tmp
+                    }
+                    time2 <- Sys.time()
                 }
                 print(paste(a, s, p, landtype, sp, as.character(round(time2-time1, 2)), "sec."))
 

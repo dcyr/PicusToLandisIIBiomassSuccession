@@ -63,7 +63,7 @@ for (a in areas) {
 
     for (i in seq_along(landisCCScenarios)){# i <- 1
         y <- as.numeric(names(landisCCScenarios[[i]]))
-        for (j in seq_along(y)) { # j <- 2
+        for (j in seq_along(y)) { # j <- 1
             s <- landisCCScenarios[[i]][[j]][1] ### scenarioCC
             p <- landisCCScenarios[[i]][[j]][2] ### periodCC
 
@@ -78,8 +78,11 @@ for (a in areas) {
             maxBiomass[is.na(maxBiomass)] <- 0
             maxANPP[is.na(maxANPP)] <- 0
 
-            maxBiomass$ind <- as.factor(paste(substr(maxBiomass$ind, 1,3),
-                                              substr(maxBiomass$ind, 4,4), sep="_") )
+            ## formating landtype names
+            l <- as.character(maxBiomass$ind)
+            maxBiomass$ind <- as.factor(paste(substr(l, 1, nchar(l)-1),
+                                              substr(maxBiomass$ind, nchar(l),nchar(l)), sep="_") )
+            rm(l)
 
             paramsTmp <- data.frame(year = rep(ifelse(j==1, y[j], y[j]+10), length(spp)),
                             landtype= maxBiomass$ind,

@@ -1,6 +1,6 @@
 # Picus to Landis-II Biomass Succession - Atlantic Maritime
-Dominic cyr  
-Updated on Sep 30 2015
+Dominic Cyr  
+Updated on Oct 08 2015
 
 -------
 

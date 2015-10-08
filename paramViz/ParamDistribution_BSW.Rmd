@@ -1,6 +1,6 @@
 ---
 title: "Picus to Landis-II Biomass Succession - Boreal Shield West"
-author: "Dominic cyr"
+author: "Dominic Cyr"
 output: 
   
   html_document: 

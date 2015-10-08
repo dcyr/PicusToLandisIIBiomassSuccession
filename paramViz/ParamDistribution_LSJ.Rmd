@@ -1,6 +1,6 @@
 ---
 title: "Picus to Landis-II Biomass Succession - Lac Saint-Jean"
-author: "Dominic cyr"
+author: "Dominic Cyr"
 output:
   html_document:
     keep_md: yes

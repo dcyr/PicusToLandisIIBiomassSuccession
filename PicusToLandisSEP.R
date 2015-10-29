@@ -30,7 +30,7 @@ x <- list.files(full.names=F)
 x <- x[grep("picusOutputsDF_", x)]
 #### subsample of folderNames
 areas <- unique(gsub("picusOutputsDF_|.csv", "", x))
-
+areas <- "MC"
 
 for (a in areas) { # a <- areas[5]
 

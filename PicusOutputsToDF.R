@@ -8,9 +8,10 @@
 ######################
 rm(list=ls())
 
+## From Anthony's dropbox
 picusOutputDir <- ifelse(Sys.info()["sysname"]=="Linux",
-                         "/media/dcyr/Windows7_OS/Travail/SCF/Landis/Picus/Outputs",
-                         "C:/Travail/SCF/Landis/Picus/Outputs")
+                         "/home/dcyr/Dropbox/PICUS DATA",
+                         "C:/Dropbox/PICUS DATA")
 processedOutputDir <- ifelse(Sys.info()["sysname"]=="Linux",
                              "/media/dcyr/Windows7_OS/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession",
                              "C:/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession")
@@ -33,52 +34,50 @@ vegCodes <- read.csv(text = getURL(paste(readURL, "vegCodes.csv", sep="/")))
 
 ######################
 ######################
-##### The following section, including the big loop, is dependent on a specific file structure (PICUS outputs produced by Anthony Taylor)
-############
-folderNames <- list.dirs(picusOutputDir, full.names=F, recursive=F)
-#### subsample of folderNames
-#folderNames <- folderNames[grep("Acadian", folderNames)]#"AM|BSE|BSW|BP"
-outputInfo <- strsplit(folderNames, "_")
+## From Anthony's dropbox
+areaFolders <- list.dirs(picusOutputDir, full.names=F, recursive=F)
+#
+areas <- strsplit(areaFolders, " ")
+areas <- as.character(lapply(areas, function(x) gsub("DATA_", "", x[2])))
+#areaSubsample <- areas
+areaSubsample <- "MC"
+#
+folderNames <- areaFolders[areas %in% areaSubsample]
 folderNames <- paste(picusOutputDir, folderNames, sep="/")
-#### extracting simulation info from picus outputs folder names
+#
 
-### to compute parameters for all areas, use this:
-#areas <- unique(rapply(outputInfo, function(x) x[1]))
-### else, comment out previous line and specify which one(s) to compute
-areas <- c("MC")
 
-scenarios <- unique(rapply(outputInfo, function(x) x[2]))
-periods <- unique(rapply(outputInfo, function(x) x[3]))
-
-######################
-######### This big loop read all csv files and gather information into a big dataframe
-require(stringr)
-#############
-for (a in areas) { #a <- areas[1]
+for (a in seq_along(folderNames)) {
+    require(stringr)
+    areaCode <- areaSubsample[a]
+    zipFiles <- list.files(folderNames[a])
+    spp <- unique(vegCodes[vegCodes[,areaCode]==1,"picusRef"])
+    ## creating list for each quadrat
     picusOutputs <- list()
-    picusOutputs <- list()
+    ## fetching spp list
+    for (i in seq_along(zipFiles)) {
+        z <- zipFiles[i]
 
-    folderArea <- folderNames[grep(a, folderNames)]
-
-    spp <- unique(vegCodes[vegCodes[,a]==1,"picusRef"])
-
-    for (i in seq_along(folderArea)) { # i <- 1
-
-        s <- outputInfo[[i]][2]  ### nome of scenario
-        p <- outputInfo[[i]][length(outputInfo[[i]])] ## name of period
-
+        info <- gsub(".zip", "", z)
+        info <- strsplit(info, "_")
+        s <- info[[1]][1]  ### nome of scenario
+        s <- ifelse(s == "baseline", "Baseline", toupper(s))
+        p <- ifelse(is.na(info[[1]][2]), "Baseline", info[[1]][2])
+        ## zipfile full name
+        z <-paste(folderNames[a], z, sep="/")
         #### creation of lists where dataframes are stored
         if (s %in% names(picusOutputs) == F) {
             picusOutputs[[s]] <- list()
         }
+
         picusOutputs[[s]][[p]] <- list()
-        ####
-        x <- list.files(folderArea[i])
+
+
+        x <- unzip(z, list = TRUE)$Name
 
         for (sp in as.character(spp)) { # sp <- as.character(spp[9])
-
             #### fetching .csv files
-            sppIndex <- grep(sp, x)
+            sppIndex <- agrep(sp, x)  ## fuzzy match
             deadwoodIndex <- grep("Deadwood", x)
             standIndex <- grep("Stand", x)
             #### read corresponding .csv files
@@ -86,10 +85,13 @@ for (a in areas) { #a <- areas[1]
             sppStand <- x[intersect(sppIndex, standIndex)]
 
             for (j in seq_along(sppStand)) { #j <- 1
+                standCSV <- sppStand[j]
+                deadCSV <- sppDeadwood[j]
                 time1 <- Sys.time()
-                standTmp <- read.csv(paste(folderArea[i], sppStand[j], sep="/"))
+                #
+                standTmp <- read.csv(unz(z , filename = standCSV))
                 if (nrow(standTmp)!=0)  {
-                    deadwoodTmp <- read.csv(paste(folderArea[i], sppDeadwood[j], sep="/"))
+                    deadwoodTmp <- read.csv(unz(z , filename = deadCSV))
                     standTmp <- standTmp[,c("Year","BiomassAbove_kg_ha")]
                     deadwoodTmp <- deadwoodTmp[,c("Year","DiedBiomassAbove_kg")]
 
@@ -98,10 +100,10 @@ for (a in areas) { #a <- areas[1]
                     tmp[,"anpp"] <- diff(c(0,tmp[,"BiomassAbove_kg_ha"])) + tmp[,"DiedBiomassAbove_kg"]   #### ici je dois vérifier si les valeurs simulées correspondent à l'état au début ou à la fin du pas de temps
                     ###############################################
                     #################
-                    landtype  <- str_extract(sppStand[j], "[0-9]+")
+                    landtype  <- str_extract(basename(standCSV), "[0-9]+")
                     tmp[,"landtype"] <- landtype
                     tmp[,"species"] <- sp
-                    tmp[,"ecozone"] <- a
+                    tmp[,"ecozone"] <- areaCode
                     tmp[,"scenario"] <- s
                     tmp[,"period"] <- p
 
@@ -112,7 +114,7 @@ for (a in areas) { #a <- areas[1]
                     }
                     time2 <- Sys.time()
                 }
-                print(paste(a, s, p, landtype, sp, as.character(round(time2-time1, 2)), "sec."))
+                print(paste(areaCode, s, p, landtype, sp, as.character(round(time2-time1, 2)), "sec."))
 
             }
             #### storing 1 dataframe per species
@@ -120,6 +122,7 @@ for (a in areas) { #a <- areas[1]
             rm(picusDF)
         }
     }
+
 
     for (s in names(picusOutputs)){
         for (p in names(picusOutputs[[s]]))  {
@@ -137,7 +140,7 @@ for (a in areas) { #a <- areas[1]
     picusOutputsDF[,"landtype"] <- as.factor(picusOutputsDF[,"landtype"])
     picusOutputsDF[,"species"] <- as.factor(picusOutputsDF[,"species"])
 
-    write.csv(picusOutputsDF, paste0("picusOutputsDF_", a, ".csv"), row.names=FALSE)
+    write.csv(picusOutputsDF, paste0("picusOutputsDF_", areaCode, ".csv"), row.names=FALSE)
     rm(picusOutputsDF)
 }
-######
+

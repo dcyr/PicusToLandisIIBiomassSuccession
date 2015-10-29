@@ -1,11 +1,12 @@
 ---
 title: "Picus to Landis-II Biomass Succession - Montane Cordillera"
 author: "Dominic Cyr"
-output: 
-  
-  html_document: 
+output:
+  html_document:
     keep_md: yes
     theme: cosmo
+    toc: yes
+  pdf_document:
     toc: yes
 ---
 Updated on `r format(Sys.time(), "%b %d %Y")`

@@ -40,7 +40,7 @@ areaFolders <- list.dirs(picusOutputDir, full.names=F, recursive=F)
 areas <- strsplit(areaFolders, " ")
 areas <- as.character(lapply(areas, function(x) gsub("DATA_", "", x[2])))
 #areaSubsample <- areas
-areaSubsample <- "AM"
+areaSubsample <- "BSW"
 #
 folderNames <- areaFolders[areas %in% areaSubsample]
 folderNames <- paste(picusOutputDir, folderNames, sep="/")
@@ -114,7 +114,7 @@ for (a in seq_along(folderNames)) {
                     }
                     time2 <- Sys.time()
                 }
-                print(paste(areaCode, s, p, landtype, sp, as.character(round(time2-time1, 2)), "sec."))
+                try(print(paste(areaCode, s, p, landtype, sp, as.character(round(time2-time1, 2)), "sec.")))
 
             }
             #### storing 1 dataframe per species

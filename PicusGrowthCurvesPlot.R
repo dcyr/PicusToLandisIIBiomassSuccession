@@ -1,8 +1,7 @@
 ######################
 ######################
 #######
-#######   Production of reference files for calibrating the growth curve parameter of Landis-II Biomass succession
-#######   (depends on "picusOutputsDF.RData", produced by "PicusOutputsToDF.r")
+#######   Plotting of raw Picus growth curves.
 #######   Dominic Cyr
 #######
 #####################
@@ -54,6 +53,7 @@ for (a in seq_along(areas)) {
 
 
     ## shuffling simID for plotting
+    ## (if you don't do that, some colors hide the ones just before)
     uniqueSimID <- unique(df$simID)
     df$simID <- match(df$simID, sample(uniqueSimID))
     ## renaming/reordering  levels

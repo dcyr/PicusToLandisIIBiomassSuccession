@@ -10,8 +10,8 @@ rm(list=ls())
 
 ## From Anthony's dropbox
 picusOutputDir <- ifelse(Sys.info()["sysname"]=="Linux",
-                         "/home/dcyr/Dropbox/PICUS DATA",
-                         "C:/Dropbox/PICUS DATA")
+                         "/media/dcyr/Windows7_OS/Travail/SCF/Landis/Picus/PICUS DATA",
+                         "C:/Travail/SCF/Landis/Picus/PICUS DATA")
 processedOutputDir <- ifelse(Sys.info()["sysname"]=="Linux",
                              "/media/dcyr/Windows7_OS/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession",
                              "C:/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession")
@@ -40,7 +40,7 @@ areaFolders <- list.dirs(picusOutputDir, full.names=F, recursive=F)
 areas <- strsplit(areaFolders, " ")
 areas <- as.character(lapply(areas, function(x) gsub("DATA_", "", x[2])))
 #areaSubsample <- areas
-areaSubsample <- "BP"
+areaSubsample <- "Acadian"
 #
 folderNames <- areaFolders[areas %in% areaSubsample]
 folderNames <- paste(picusOutputDir, folderNames, sep="/")
@@ -122,7 +122,7 @@ for (a in seq_along(folderNames)) {
             rm(picusDF)
         }
     }
-
+    #save(picusOutputs, file = paste0("picusOutputs_", areaCode, ".RData"))
 
     for (s in names(picusOutputs)){
         for (p in names(picusOutputs[[s]]))  {

@@ -1,6 +1,6 @@
 # Picus outputs to LANDIS-II Biomass Succession dynamic inputs
 Dominic Cyr  
-Updated on Sep 16 2015
+Updated on Nov 17 2015
 
 -------
 
@@ -30,7 +30,7 @@ If you're not interested in the details but want to visualize what those sets of
     + [Boreal Shield West][15]
     + [Boreal Plain][16]
     + [Montane Cordillera][17]
-    + Pacific Maritime (coming soon)
+    + [Pacific Maritime][20]
     
 + CBFA Project
     + [Lac Saint-Jean][18]
@@ -90,3 +90,4 @@ More details about those parameters, how they interact with each other, and how 
 [17]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_MC.md
 [18]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_LSJ.md
 [19]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_WestON.md
+[20]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_PM.md

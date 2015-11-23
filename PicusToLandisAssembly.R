@@ -23,6 +23,7 @@ setwd(paste(processedOutputDir, Sys.Date(), sep="/"))
 ### vegCodes is the species master list
 ### It indicates which species to look in picus output folders
 require(RCurl)
+require(dplyr)
 readURL <- "https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/"
 vegCodes <- read.csv(text = getURL(paste(readURL, "vegCodes.csv", sep="/")))
 ######################
@@ -89,6 +90,59 @@ for (a in areas) {
                             probEst = pEst$values,  ##### "probEst" To Be Attributed
                             maxANPP = round(maxANPP$values, 0),
                             maxB = round(maxBiomass$values, 0))
+
+
+            #########################
+            ######## applying cut-offs
+            #########################
+            tmp <-paramsTmp[,c("probEst", "maxANPP", "maxB")]
+
+            ## if SEP == 0 then maxANPP & maxB == 0
+            index <- which(tmp[,"probEst"] == 0)
+            tmp[index,c("maxANPP", "maxB")] <- 0
+
+            ## if SEP > 0 & maxANPP == 0 then maxANPP == 1,
+            index <- which(tmp[,"probEst"] > 0 &
+                               tmp[,"maxANPP"] == 0)
+            tmp[index, "maxANPP"] <- 1
+
+            ## if SEP > 0 & maxB == 0 then maxB == 1,
+            index <- which(tmp[,"probEst"] > 0 &
+                               tmp[,"maxB"] == 0)
+            tmp[index, "maxB"] <- 10
+
+            ## if maxB > 0 & maxANPP == 0, then maxANPP == 1
+            index <- which(tmp[,"maxANPP"] == 0 &
+                               tmp[,"maxB"] > 0 )
+
+            tmp[index, "maxANPP"] <- 1
+            tmp[index, "maxB"] <- 10
+
+            ## if maxB == 0 & maxANPP > 0, then maxB == 10
+            index <- which(tmp[,"maxB"] == 0 &
+                               tmp[,"maxANPP"] > 0 )
+            tmp[index ,"maxB"] <- 10
+
+            paramsTmp[,c("probEst", "maxANPP", "maxB")] <- tmp
+            ## identifying landtypes with no possible biomass
+            landtypeZeroB <- paramsTmp %>% group_by(landtype) %>%
+                summarize(maxB = max(maxB)) %>%
+                filter(maxB == 0) %>%
+                select(landtype)
+            landtypeZeroB <- as.character(landtypeZeroB$landtype)
+
+            ## replacing zeros by non-zero values for the first species in each of these landtypes
+            index <- which(paramsTmp$landtype %in% landtypeZeroB &
+                               paramsTmp$species == spp[1])
+
+            if(length(index) > 0) {
+                paramsTmp[index, "probEst"] <- 0.001
+                paramsTmp[index, "maxANPP"] <- 1
+                paramsTmp[index, "maxB"] <- 10
+            }
+            #########################
+            #########################
+
             if(exists("params")) {
                 params <- rbind(params, paramsTmp)
             } else {

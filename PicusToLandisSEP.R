@@ -32,7 +32,7 @@ x <- x[grep("picusOutputsDF_", x)]
 areas <- unique(gsub("picusOutputsDF_|.csv", "", x))
 #areas <- "BSE"
 
-for (a in areas) { # a <- areas[5]
+for (a in areas) { # a <- areas[15]
 
     ######################
     picusOutputsDF <- read.csv(paste0("picusOutputsDF_", a, ".csv"))  ### this .csv file is produced by

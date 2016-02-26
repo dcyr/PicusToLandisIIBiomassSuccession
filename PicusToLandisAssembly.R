@@ -34,7 +34,7 @@ x <- x[grep("growthParam_", x)]
 #### subsample of folderNames
 #folderNames <- folderNames[grep("Acadian", folderNames)]#"AM|BSE|BSW|BP"
 areas <- unique(gsub("growthParam_|.RData", "", x))
-
+timestep <- 5
 
 #### configuration of landis Climate Change scenarios
 landisCCScenarios <- list(RCP85 = list("0" = c("Baseline", "Baseline"),
@@ -57,7 +57,7 @@ for (a in areas) {
 
     #### assembling parameter table according to landis format
     growthParam <- get(load(paste0("growthParam_", a, ".RData")))
-    sep <- get(load(paste0("sep_", a, ".RData")))
+    sep <- get(load(paste0("sep_", a, "_5yrsTS.RData")))
     biomassSuccessionDynamicParams <- list()
 
 
@@ -84,7 +84,7 @@ for (a in areas) {
                                               substr(maxBiomass$ind, nchar(l),nchar(l)), sep="_") )
             rm(l)
 
-            paramsTmp <- data.frame(year = rep(ifelse(j==1, y[j], y[j]+10), length(spp)),
+            paramsTmp <- data.frame(year = rep(ifelse(j==1, y[j], y[j]+timestep), length(spp)),
                             landtype= maxBiomass$ind,
                             species = spp,
                             probEst = pEst$values,  ##### "probEst" To Be Attributed
@@ -127,9 +127,14 @@ for (a in areas) {
             ## identifying landtypes with no possible biomass
             landtypeZeroB <- paramsTmp %>% group_by(landtype) %>%
                 summarize(maxB = max(maxB)) %>%
-                filter(maxB == 0) %>%
-                select(landtype)
-            landtypeZeroB <- as.character(landtypeZeroB$landtype)
+                filter(maxB == 0)
+
+            if(nrow(landtypeZeroB)>0) {
+                landtypeZeroB <- as.character(landtypeZeroB$landtype)
+            } else {
+                landtypeZeroB <- NULL
+            }
+
 
             ## replacing zeros by non-zero values for the first species in each of these landtypes
             index <- which(paramsTmp$landtype %in% landtypeZeroB &

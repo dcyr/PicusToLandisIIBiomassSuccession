@@ -1,6 +1,6 @@
 # Picus outputs to LANDIS-II Biomass Succession dynamic inputs
 Dominic Cyr  
-Updated on Nov 17 2015
+Updated on Dec 14 2015
 
 -------
 
@@ -19,7 +19,7 @@ If you're not interested in the details but want to visualize what those sets of
 + Distribution of parameter values among land types
     + Maximum annual aboveground biomass (maxAGB)
     + Maximum annual net primary productivity (maxANPP)
-    + Species probability of establishment (SEP)
+    + Species establishment probability (SEP)
 + Picus simulations raw outputs (Pure stand growth - Aboveground biomass)
 
 ### Simulated landscapes
@@ -31,6 +31,7 @@ If you're not interested in the details but want to visualize what those sets of
     + [Boreal Plain][16]
     + [Montane Cordillera][17]
     + [Pacific Maritime][20]
+    + [Boreal Cordillera][21]
     
 + CBFA Project
     + [Lac Saint-Jean][18]
@@ -48,7 +49,7 @@ If you're not interested in the details but want to visualize what those sets of
 
 One of the current study's objective is to emulate species growth as simulated by PICUS, upscale it to landscape level using LANDIS-II, and integrate processes that occur at those scales such as fire, seed dispersal, and landscape-level forest management, etc.
 
-More specifically, that involves fetching PICUS outputs, passing them to a first script that format those into a tidy .csv file, which is then used to generate Species Establishment Probabilities (__SEP__) and growth parameters (__maxANPP__ and __maxAGB__. Those parameter set are then finally assembled into the appropriate format for LANDIS-II, according to user-specified scenarios.
+More specifically, that involves fetching PICUS outputs, passing them to a first script that format those into a tidy .csv file, which is then used to generate Species Establishment Probabilities (__SEP__) and growth parameters (__maxANPP__ and __maxAGB__). Those parameter set are then finally assembled into the appropriate format for LANDIS-II, according to user-specified scenarios.
 
 The scripts allow to automate the processing of multiple species, climate scenarios, periods, and simulation areas at once.
 
@@ -62,7 +63,7 @@ More details about each steps can be found in the markdown files (.md) that are 
 
 + [PicusOutputsToDF.R][4] allow to process PICUS outputs in batch and yields a tidy data table to be used as input in downstream steps of the pipeline. Description [here][5].
 + [PicusToLandisSEP.R][6] yields Species Establishment Probabilities (SEP) from previously formatted PICUS outputs. Description [here][7]
-+ [PicusToLandisGrowthParam.R][8] yields growth parameters (**maxANPP** and **maxBiomass**) from previously formatted PICUS outputs. Description [here][9].
++ [PicusToLandisGrowthParam.R][8] yields growth parameters (**maxANPP** and **maxAGB**) from previously formatted PICUS outputs. Description [here][9].
 + [PicusToLandisAssembly.R][10]. takes the information contained in *growthParam.RData* and *pEst.RData*, produced by [PicusToLandisGrowthParam.R][8] and [PicusToLandisSEP.R][6], respectively, and format them into .txt files ready to be used as [LANDIS-II][1] [*Biomass Succesion*][2] dynamic inputs. Description [here][11].
 
 
@@ -91,3 +92,4 @@ More details about those parameters, how they interact with each other, and how 
 [18]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_LSJ.md
 [19]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_WestON.md
 [20]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_PM.md
+[21]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_BC.md

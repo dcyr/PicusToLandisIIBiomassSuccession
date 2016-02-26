@@ -30,7 +30,8 @@ x <- list.files(full.names=F)
 x <- x[grep("picusOutputsDF_", x)]
 #### subsample of folderNames
 areas <- unique(gsub("picusOutputsDF_|.csv", "", x))
-#areas <- "BSE"
+timestep <- 10
+
 
 for (a in areas) { # a <- areas[15]
 
@@ -84,7 +85,7 @@ for (a in areas) { # a <- areas[15]
                     }
                 }
             }
-            prob <- round(pbinom(q=0, size=10, prob=1/timeBeforeBiomass[[s]][[p]], lower.tail=FALSE), 3)
+            prob <- round(pbinom(q=0, size=timestep, prob=1/timeBeforeBiomass[[s]][[p]], lower.tail=FALSE), 3)
             prob[is.na(prob)] <- 0
             pEst[[s]][[p]] <- prob
             #write.csv(timeBeforeBiomass[[s]][[p]], file=paste("timeBeforeBiomass_", s,"_", p, ".csv", sep=""))
@@ -92,7 +93,7 @@ for (a in areas) { # a <- areas[15]
         }
     }
     save(pEst, file=paste0("sep_", a, ".RData"))
-    rm(pEst)
+    #rm(pEst)
 }
 
 # ##########

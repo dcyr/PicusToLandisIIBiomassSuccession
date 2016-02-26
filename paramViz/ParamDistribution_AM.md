@@ -1,6 +1,6 @@
 # Picus to Landis-II Biomass Succession - Atlantic Maritime
 Dominic Cyr  
-Updated on Nov 02 2015
+Updated on Dec 14 2015
 
 -------
 
@@ -22,17 +22,17 @@ Much of the succession dynamics simulated by LANDIS-II depends on those values, 
 
 -------
 
-![Picus inferred maxAGB](..//figures/ParamDistrib_maxAGB_AM.png)
+![Picus inferred maxAGB](..//figures/ParamDistrib_maxAGB_BC.png)
 
 
 -------
 
-![Picus inferred maxANPP](..//figures/ParamDistrib_maxANPP_AM.png)
+![Picus inferred maxANPP](..//figures/ParamDistrib_maxANPP_BC.png)
 
 
 -------
 
-![Picus inferred SEP](..//figures/ParamDistrib_SEP_AM.png)
+![Picus inferred SEP](..//figures/ParamDistrib_SEP_BC.png)
 
 -------
 
@@ -44,5 +44,5 @@ The following figure illustrates Picus outputs for each species and all land typ
 
 Simulations are started from bare ground, allowing only one species at the time and are ran for 250 years.
 
-![Picus raw outputs](..//figures/picusGrowth_AM.png)
+![Picus raw outputs](..//figures/picusGrowth_BC.png)
 

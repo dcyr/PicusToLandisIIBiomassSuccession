@@ -1,6 +1,6 @@
 # Picus to Landis-II Biomass Succession - Lac Saint-Jean
 Dominic Cyr  
-Updated on Oct 08 2015
+Updated on Feb 26 2016
 
 -------
 

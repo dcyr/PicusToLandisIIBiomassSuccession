@@ -57,7 +57,13 @@ for (a in areas) {
 
     #### assembling parameter table according to landis format
     growthParam <- get(load(paste0("growthParam_", a, ".RData")))
-    sep <- get(load(paste0("sep_", a, ".RData")))
+    if (timestep == 10) {
+        sep <- get(load(paste0("sep_", a, ".RData")))
+    }
+    if (timestep == 5) {
+        sep <- get(load(paste0("sep_", a, "_5yrsTS.RData")))
+    }
+
     biomassSuccessionDynamicParams <- list()
 
 
@@ -165,7 +171,13 @@ for (a in areas) {
         params <- biomassSuccessionDynamicParams[[i]]
         sName <- names(biomassSuccessionDynamicParams)[i]
 
-        fileName <- paste("biomass-succession-dynamic-inputs_", a, "_", sName, ".txt", sep="")
+        if (timestep == 10) {
+            fileName <- paste("biomass-succession-dynamic-inputs_", a, "_", sName, ".txt", sep="")
+        }
+        if (timestep == 5) {
+            fileName <- paste("biomass-succession-dynamic-inputs_", a, "_", sName, "_5yrsTS.txt", sep="")
+        }
+
 
         ## intro section
         sink(fileName)

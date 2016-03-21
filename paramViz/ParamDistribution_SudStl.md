@@ -32,7 +32,7 @@ Much of the succession dynamics simulated by LANDIS-II depends on those values, 
 
 -------
 
-![Picus inferred SEP](..//figures/ParamDistrib_SEP_SudStl.png)
+![Picus inferred SEP](..//figures/ParamDistrib_SEP_SudStl_5yrsTS.png)
 
 -------
 

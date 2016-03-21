@@ -23,7 +23,7 @@ ecoNames <- read.csv(text = getURL(paste(readURL, "ecoNames.csv", sep="/")))
 ######################
 ############
 x <- list.files(full.names=F)
-x <- x[grep("growthParam_|sep_", x)]
+x <- x[grep("sep_", x)]
 #### subsample of folderNames
 #folderNames <- folderNames[grep("Acadian", folderNames)]#"AM|BSE|BSW|BP"
 areas <- unique(gsub("growthParam_|sep_|.RData", "", x))
@@ -31,8 +31,8 @@ areas <- unique(gsub("growthParam_|sep_|.RData", "", x))
 for (a in areas) {
 
     require(reshape2)
-
-    growthParam <- get(load(paste0("growthParam_", a, ".RData")))
+    timestep <- ifelse(grepl("5yrsTS", a), 5, 10)
+    growthParam <- get(load(paste0("growthParam_", gsub("_.*", "", a), ".RData")))
     pEst <- get(load(paste0("sep_", a, ".RData")))
 
     i <- 1
@@ -106,7 +106,7 @@ for (a in areas) {
 
             print(p + labs(title = paste0("Distribution of ", i, " among land types (N=", length(levels(params$landtype)),")\n",
                                          ecoNames[ecoNames$code==a,"name"]),
-                           y=ifelse(i=="SEP", "Species Establishment Probability (per 10-yr time step)",
+                           y=ifelse(i=="SEP", paste0("Species Establishment Probability (per ", timestep, "-yrs time step)"),
                                     ifelse(i=="maxANPP",
                                            expression(paste("maxANPP", (g %.% m^-2 %.% yr^-1))),
                                            expression(paste("maxBiomass", (tons %.% ha^-1))))),

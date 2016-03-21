@@ -1,6 +1,6 @@
 # Picus outputs to LANDIS-II Biomass Succession dynamic inputs
 Dominic Cyr  
-Updated on Dec 14 2015
+Updated on Mar 21 2016
 
 -------
 
@@ -36,6 +36,7 @@ If you're not interested in the details but want to visualize what those sets of
 + CBFA Project
     + [Lac Saint-Jean][18]
     + [Western Ontario][19]
+    + [Sud Saint-Laurent][22]
     + Manitoba - Saskatchewan (coming soon)
     + Alberta - Pacific (coming soon)
 
@@ -93,3 +94,4 @@ More details about those parameters, how they interact with each other, and how 
 [19]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_WestON.md
 [20]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_PM.md
 [21]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_BC.md
+[22]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_SudStl.md

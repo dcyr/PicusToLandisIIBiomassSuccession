@@ -1,0 +1,7 @@
+.Rhistory
+[0-9]*
+*.Rmd
+*.html
+*.pdf
+processedOutputs/*.csv
+*~

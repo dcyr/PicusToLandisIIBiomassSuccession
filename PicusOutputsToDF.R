@@ -10,10 +10,10 @@ rm(list=ls())
 
 ## From Anthony's dropbox
 picusOutputDir <- ifelse(Sys.info()["sysname"]=="Linux",
-                         "/media/dcyr/Windows7_OS/Travail/SCF/Landis/Picus/PICUS DATA",
+                         "~/Travail/SCF/Landis/Picus/PICUS DATA",
                          "C:/Travail/SCF/Landis/Picus/PICUS DATA")
 processedOutputDir <- ifelse(Sys.info()["sysname"]=="Linux",
-                             "/media/dcyr/Windows7_OS/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession",
+                             "~/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession",
                              "C:/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession")
 processedOutputDir <- paste(processedOutputDir, Sys.Date(), sep="/")
 
@@ -40,13 +40,13 @@ areaFolders <- list.dirs(picusOutputDir, full.names=F, recursive=F)
 areas <- strsplit(areaFolders, " ")
 areas <- as.character(lapply(areas, function(x) gsub("DATA_", "", x[2])))
 #areaSubsample <- areas
-areaSubsample <- "SudStl"
+areaSubsample <- "Acadian"
 #
 folderNames <- areaFolders[areas %in% areaSubsample]
 folderNames <- paste(picusOutputDir, folderNames, sep="/")
 #
 
-
+t1 <- Sys.time()
 for (a in seq_along(folderNames)) {
     require(stringr)
     areaCode <- areaSubsample[a]
@@ -143,5 +143,7 @@ for (a in seq_along(folderNames)) {
     write.csv(picusOutputsDF, paste0("picusOutputsDF_", areaCode, ".csv"), row.names=FALSE)
     rm(picusOutputsDF)
 }
+t2 <- Sys.time()
 
+t2-t1
 

@@ -1,13 +1,13 @@
 rm(list=ls())
 require(ggplot2)
-processedOutputDir <- ifelse(Sys.info()["sysname"]=="Linux",
-                             "/media/dcyr/Windows7_OS/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession",
-                             "C:/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession")
+processedOutputDir <- "~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/processedOutputs/"
 
 ### That assumes Picus outputs were processed on the same day
 ### (else, specify another folder containing formated Picus outputs)
 #setwd(paste(processedOutputDir, Sys.Date(), sep="/"))
-setwd(paste(processedOutputDir, Sys.Date(), sep="/"))
+setwd(processedOutputDir)
+wwd <- paste0("../", Sys.Date())
+setwd(wwd)
 
 ### sometimes useful to change that...
 options(scipen=4)
@@ -22,44 +22,42 @@ ecoNames <- read.csv(text = getURL(paste(readURL, "ecoNames.csv", sep="/")))
 ######################
 ######################
 ############
-x <- list.files(full.names=F)
+x <- list.files(processedOutputDir, full.names=F)
 x <- x[grep("sep_", x)]
 #### subsample of folderNames
 #folderNames <- folderNames[grep("Acadian", folderNames)]#"AM|BSE|BSW|BP"
 areas <- unique(gsub("growthParam_|sep_|.RData", "", x))
-
+areas <- "NorthShore"
 for (a in areas) {
-
     require(reshape2)
     timestep <- ifelse(grepl("5yrsTS", a), 5, 10)
-    growthParam <- get(load(paste0("growthParam_", gsub("_.*", "", a), ".RData")))
-    pEst <- get(load(paste0("sep_", a, ".RData")))
+    growthParam <- get(load(paste0(processedOutputDir, "growthParam_", gsub("_.*", "", a), ".RData")))
+    pEst <- get(load(paste0(processedOutputDir, "sep_", a, ".RData")))
 
     i <- 1
     for (s in names(growthParam)){ # s <- names(growthParam)[2]
-    for (p in names(growthParam[[s]])) { #p <- names(growthParam[[2]])[1]
-        df <- melt(growthParam[[s]][[p]][["maxBiomass"]])
-        colnames(df)[colnames(df)=="Var1"] <- "species"
-        colnames(df)[colnames(df)=="Var2"] <- "landtype"
-        colnames(df)[colnames(df)=="value"] <- "maxAGB"
-        colnames(df)[colnames(df)=="value"] <- "maxAGB"
-        df[,"maxANPP"] <- melt(growthParam[[s]][[p]][["maxANPP"]])$value
-        df[is.na(df$maxANPP),"maxANPP"] <- 0
-        df[is.na(df$maxAGB),"maxAGB"] <- 0
-        df[,"SEP"] <- melt(pEst[[s]][[p]])$value
-        df[,"period"] <- p
-        df[,"scenario"] <- s
-        df[,"ecozone"] <- a
-        df[,c("maxANPP", "maxAGB")] <- df[,c("maxANPP", "maxAGB")]*10
-        if (i ==1){
-            params <- df
-        } else {
-            params <- rbind(params, df)
-        }
-        i <- i+1
+        for (p in names(growthParam[[s]])) { #p <- names(growthParam[[2]])[1]
+            df <- melt(growthParam[[s]][[p]][["maxBiomass"]])
+            colnames(df)[colnames(df)=="Var1"] <- "species"
+            colnames(df)[colnames(df)=="Var2"] <- "landtype"
+            colnames(df)[colnames(df)=="value"] <- "maxAGB"
+            colnames(df)[colnames(df)=="value"] <- "maxAGB"
+            df[,"maxANPP"] <- melt(growthParam[[s]][[p]][["maxANPP"]])$value
+            df[is.na(df$maxANPP),"maxANPP"] <- 0
+            df[is.na(df$maxAGB),"maxAGB"] <- 0
+            df[,"SEP"] <- melt(pEst[[s]][[p]])$value
+            df[,"period"] <- p
+            df[,"scenario"] <- s
+            df[,"ecozone"] <- a
+            df[,c("maxANPP", "maxAGB")] <- df[,c("maxANPP", "maxAGB")]*10
+            if (i ==1){
+                params <- df
+            } else {
+                params <- rbind(params, df)
+            }
+            i <- i+1
         }
     }
-
 
     ## a little cleaning up
     params$period <- as.factor(params$period)

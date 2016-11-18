@@ -7,7 +7,7 @@
 #####################
 ######################
 rm(list=ls())
-setwd("/media/dcyr/Windows7_OS/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession")
+setwd("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession")
 wwd <- paste(getwd(), Sys.Date(), sep="/")
 dir.create(wwd)
 setwd(wwd)

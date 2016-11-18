@@ -1,6 +1,6 @@
 # Picus outputs to LANDIS-II Biomass Succession dynamic inputs
 Dominic Cyr  
-Updated on Mar 21 2016
+Updated on Jul 15 2016
 
 -------
 

@@ -12,13 +12,11 @@
 ######################
 rm(list=ls())
 
-processedOutputDir <- ifelse(Sys.info()["sysname"]=="Linux",
-                             "/media/dcyr/Windows7_OS/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession",
-                             "C:/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession")
+processedOutputDir <- paste("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession", Sys.Date(), sep = "/")
 
 ### That assumes Picus outputs were processed on the same day
 ### (else, specify another folder containing formated Picus outputs)
-setwd(paste(processedOutputDir, Sys.Date(), sep="/"))
+setwd(processedOutputDir)
 
 ### vegCodes is the species master list
 ### It indicates which species to look in picus output folders
@@ -34,7 +32,7 @@ x <- x[grep("growthParam_", x)]
 #### subsample of folderNames
 #folderNames <- folderNames[grep("Acadian", folderNames)]#"AM|BSE|BSW|BP"
 areas <- unique(gsub("growthParam_|.RData", "", x))
-timestep <- 5
+timestep <- 10
 
 #### configuration of landis Climate Change scenarios
 landisCCScenarios <- list(RCP85 = list("0" = c("Baseline", "Baseline"),

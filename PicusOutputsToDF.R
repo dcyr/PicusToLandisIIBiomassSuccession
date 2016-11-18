@@ -7,21 +7,23 @@
 ######################
 ######################
 rm(list=ls())
-
+beginTime <- Sys.time()
 ## From Anthony's dropbox
-picusOutputDir <- ifelse(Sys.info()["sysname"]=="Linux",
-                         "~/Travail/SCF/Landis/Picus/PICUS DATA",
-                         "C:/Travail/SCF/Landis/Picus/PICUS DATA")
-processedOutputDir <- ifelse(Sys.info()["sysname"]=="Linux",
-                             "~/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession",
-                             "C:/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession")
-processedOutputDir <- paste(processedOutputDir, Sys.Date(), sep="/")
+setwd("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession")
+picusOutputDir <- "../PICUS DATA"
+
+###
+require(parallel)
+require(data.table)
+
+clusterN <- floor(detectCores()*.8) ### this script is I/O limited, I'm not even sure parallelizing is useful here
+# clusterN <- floor(detectCores()*.8)  ### choose number of nodes to add to cluster.
+sysName <- Sys.info()["sysname"]
+
+processedOutputDir <- paste(getwd(), Sys.Date(), sep="/")
 
 ###
 dir.create(processedOutputDir)
-setwd(processedOutputDir)
-rm(processedOutputDir)
-readDir <- picusOutputDir ###  may be changed if the dataframe was created another day
 
 ### vegCodes is the species master list
 ### It indicates which species to look in picus output folders
@@ -40,15 +42,14 @@ areaFolders <- list.dirs(picusOutputDir, full.names=F, recursive=F)
 areas <- strsplit(areaFolders, " ")
 areas <- as.character(lapply(areas, function(x) gsub("DATA_", "", x[2])))
 #areaSubsample <- areas
-areaSubsample <- "Acadian"
+areaSubsample <- "NorthShore"
 #
 folderNames <- areaFolders[areas %in% areaSubsample]
 folderNames <- paste(picusOutputDir, folderNames, sep="/")
 #
 
-t1 <- Sys.time()
 for (a in seq_along(folderNames)) {
-    require(stringr)
+    #require(stringr)
     areaCode <- areaSubsample[a]
     zipFiles <- list.files(folderNames[a])
     spp <- unique(vegCodes[vegCodes[,areaCode]==1,"picusRef"])
@@ -61,7 +62,7 @@ for (a in seq_along(folderNames)) {
         info <- gsub(".zip", "", z)
         info <- strsplit(info, "_")
         s <- info[[1]][1]  ### nome of scenario
-        s <- ifelse(s == "baseline", "Baseline", toupper(s))
+        s <- ifelse(s == "baseline" | s == "Baseline", "Baseline", toupper(s))
         p <- ifelse(is.na(info[[1]][2]), "Baseline", info[[1]][2])
         ## zipfile full name
         z <-paste(folderNames[a], z, sep="/")
@@ -69,13 +70,22 @@ for (a in seq_along(folderNames)) {
         if (s %in% names(picusOutputs) == F) {
             picusOutputs[[s]] <- list()
         }
-
-        picusOutputs[[s]][[p]] <- list()
-
-
         x <- unzip(z, list = TRUE)$Name
 
-        for (sp in as.character(spp)) { # sp <- as.character(spp[9])
+        require(doSNOW)
+        if (sysName=="Windows") {
+            cl = makeCluster(clusterN, rscript="Rscript.exe", type='SOCK')
+        }
+        if (sysName=="Linux") {
+            cl = makeCluster(clusterN)
+        }
+
+        registerDoSNOW(cl)
+        t1 <- Sys.time()
+        picusDF <- foreach (sp = as.character(spp)) %dopar% { # sp <- as.character(spp[9])
+            require(stringr)
+            require(foreach)
+            
             #### fetching .csv files
             sppIndex <- agrep(sp, x)  ## fuzzy match
             deadwoodIndex <- grep("Deadwood", x)
@@ -84,10 +94,11 @@ for (a in seq_along(folderNames)) {
             sppDeadwood <- x[intersect(sppIndex, deadwoodIndex)]
             sppStand <- x[intersect(sppIndex, standIndex)]
 
-            for (j in seq_along(sppStand)) { #j <- 1
+            df1 <- foreach(j = seq_along(sppStand), .combine="rbind") %dopar% {
+                require(stringr)
                 standCSV <- sppStand[j]
                 deadCSV <- sppDeadwood[j]
-                time1 <- Sys.time()
+                #time1 <- Sys.time()
                 #
                 standTmp <- read.csv(unz(z , filename = standCSV))
                 if (nrow(standTmp)!=0)  {
@@ -106,44 +117,38 @@ for (a in seq_along(folderNames)) {
                     tmp[,"ecozone"] <- areaCode
                     tmp[,"scenario"] <- s
                     tmp[,"period"] <- p
-
-                    if(exists("picusDF")) {
-                        picusDF <- rbind(picusDF, tmp)
-                    } else {
-                        picusDF <- tmp
-                    }
-                    time2 <- Sys.time()
+                    tmp <- tmp[,c("ecozone", "scenario", "period", "landtype", "species","Year", "BiomassAbove_kg_ha", "DiedBiomassAbove_kg","anpp")]
                 }
-                try(print(paste(areaCode, s, p, landtype, sp, as.character(round(time2-time1, 2)), "sec.")))
-
+                #try(print(paste(areaCode, s, p, landtype, sp, as.character(round(time2-time1, 2)), "sec.")))
+                return(tmp)
             }
+            
             #### storing 1 dataframe per species
-            picusOutputs[[s]][[p]][[sp]] <- picusDF[,c("ecozone", "scenario", "period", "landtype", "species","Year", "BiomassAbove_kg_ha", "DiedBiomassAbove_kg","anpp")]
-            rm(picusDF)
+            return(df1)
         }
+        stopCluster(cl)
+        picusOutputs[[s]][[p]] <- picusDF
+        rm(picusDF)
+        t2 <- Sys.time()
+        print(paste(s, p, round(t2-t1, 1)))
     }
-    #save(picusOutputs, file = paste0("picusOutputs_", areaCode, ".RData"))
 
-    for (s in names(picusOutputs)){
-        for (p in names(picusOutputs[[s]]))  {
-            if (exists("picusOutputsDF")) {
-                picusOutputsDF  <- rbind(picusOutputsDF, do.call("rbind", picusOutputs[[s]][[p]]))
-            } else {
-                picusOutputsDF <- do.call("rbind", picusOutputs[[s]][[p]])
-            }
+    picusOutputsDF <- foreach(s = seq_along(picusOutputs), .combine = "rbind") %do% {
+        foreach(p = seq_along(picusOutputs[[s]]), .combine = "rbind") %do% {
+            do.call("rbind", picusOutputs[[s]][[p]])
         }
     }
-    ### converting character vectors into factor (not really useful since it all goes into a .csv file)
+   
+    ### converting character vectors into factor (not that useful since it all goes into a .csv file)
     picusOutputsDF[,"ecozone"] <- as.factor(picusOutputsDF[,"ecozone"])
     picusOutputsDF[,"scenario"] <- as.factor(picusOutputsDF[,"scenario"])
     picusOutputsDF[,"period"] <- as.factor(picusOutputsDF[,"period"])
     picusOutputsDF[,"landtype"] <- as.factor(picusOutputsDF[,"landtype"])
     picusOutputsDF[,"species"] <- as.factor(picusOutputsDF[,"species"])
 
-    write.csv(picusOutputsDF, paste0("picusOutputsDF_", areaCode, ".csv"), row.names=FALSE)
+    write.csv(picusOutputsDF, paste0(processedOutputDir, "/picusOutputsDF_", areaCode, ".csv"), row.names=FALSE)
+    
     rm(picusOutputsDF)
 }
-t2 <- Sys.time()
 
-t2-t1
 

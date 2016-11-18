@@ -14,13 +14,11 @@
 ######################
 rm(list=ls())
 
-processedOutputDir <- ifelse(Sys.info()["sysname"]=="Linux",
-                             "/media/dcyr/Windows7_OS/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession",
-                             "C:/Travail/Git/LandisScripts/PicusToLandisIIBiomassSuccession")
-
+processedOutputDir <- paste("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession", Sys.Date(), sep = "/")
+                             
 ### That assumes Picus outputs were processed on the same day
 ### (else, specify another folder containing formated Picus outputs)
-setwd(paste(processedOutputDir, Sys.Date(), sep="/"))
+setwd(processedOutputDir)
 
 
 ### vegCodes is the species master list
@@ -34,8 +32,8 @@ vegCodes <- read.csv(text = getURL(paste(readURL, "vegCodes.csv", sep="/")))
 x <- list.files(full.names=F)
 x <- x[grep("picusOutputsDF_", x)]
 #### subsample of folderNames
-areas <- unique(gsub("picusOutputsDF_|.csv", "", x))
-#areas <- "Acadian"
+#areas <- unique(gsub("picusOutputsDF_|.csv", "", x))
+areas <- "NorthShore"
 
 ####################
 for (a in areas) {# a <- areas[1]

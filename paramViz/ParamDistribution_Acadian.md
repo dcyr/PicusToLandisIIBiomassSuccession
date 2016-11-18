@@ -1,6 +1,6 @@
-# Picus to Landis-II Biomass Succession - Acadian
+# Picus to Landis-II Biomass Succession - North Shore
 Dominic Cyr  
-Updated on Nov 13 2015
+Updated on Nov 18 2016
 
 -------
 
@@ -22,17 +22,17 @@ Much of the succession dynamics simulated by LANDIS-II depends on those values, 
 
 -------
 
-![Picus inferred maxAGB](..//figures/ParamDistrib_maxAGB_Acadian.png)
+![](..//figures/ParamDistrib_maxAGB_NorthShore.png)
 
 
 -------
 
-![Picus inferred maxANPP](..//figures/ParamDistrib_maxANPP_Acadian.png)
+![](..//figures/ParamDistrib_maxANPP_NorthShore.png)
 
 
 -------
 
-![Picus inferred SEP](..//figures/ParamDistrib_SEP_Acadian.png)
+![](..//figures/ParamDistrib_SEP_NorthShore.png)
 
 -------
 
@@ -43,5 +43,5 @@ The following figure illustrates Picus outputs for each species and all land typ
 
 Simulations are started from bare ground, allowing only one species at the time and are ran for 250 years.
 
-![Picus raw outputs](..//figures/picusGrowth_Acadian.png)
+![](..//figures/picusGrowth_NorthShore.png)
 

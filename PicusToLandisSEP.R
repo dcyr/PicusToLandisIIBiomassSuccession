@@ -30,7 +30,6 @@ x <- x[grep("picusOutputsDF_", x)]
 areas <- unique(gsub("picusOutputsDF_|.csv", "", x))
 timestep <- 10
 
-
 for (a in areas) { # a <- areas[15]
 
     ######################

@@ -1,6 +1,6 @@
 # Picus to Landis-II Biomass Succession - North Shore
 Dominic Cyr  
-Updated on Nov 18 2016
+Updated on Nov 23 2016
 
 -------
 
@@ -32,7 +32,7 @@ Much of the succession dynamics simulated by LANDIS-II depends on those values, 
 
 -------
 
-![](..//figures/ParamDistrib_SEP_NorthShore.png)
+![](..//figures/ParamDistrib_SEP_NorthShore_5yrsTS.png)
 
 -------
 

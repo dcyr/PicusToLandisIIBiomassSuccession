@@ -58,8 +58,8 @@ for (k in maxBiomassCoeff) {
             
             finalInputs <- intermediateInputs
             finalInputs[c("maxANPP", "maxB")] <- round(finalInputs[finalInputs$species == sp, c("maxANPP", "maxB")] *
-                                corrFactor)
-
+                                                           corrFactor)
+            
             target <- propMaxBiomassBoost[[i]][j]
             ##### writing to file
             fileName <- paste0("biomass-succession-dynamic-inputs_",
@@ -142,7 +142,9 @@ for (i in seq_along(files)) {
     } else {
         simInfo <- rbind(simInfo, df)
     }
-   
+    
 }
 write.csv(simInfo, file = "../simInfo.csv", row.names = F)
+
+
 

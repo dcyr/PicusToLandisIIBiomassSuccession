@@ -1,7 +1,11 @@
 rm(list = ls())
+<<<<<<< HEAD
 #setwd("C:/Users/Dominic Cyr/Desktop/NorthShore")
 setwd("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/NorthShore")
 os <- Sys.info()["sysname"]
+=======
+setwd("/media/dcyr/Seagate Backup Plus Drive/Sims/NorthShoreCalib")
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
 
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
@@ -31,11 +35,19 @@ spp <- as.character(vegCodes[vegCodes[, a] == 1, "LandisCode"] )
 readURL <- "https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/raw/master/LandisInputs/"
 tmpFile <- tempfile()
 url <- paste(readURL, a, "/landtypes_", a, ".tif", sep="")
+<<<<<<< HEAD
 download.file(url, tmpFile, method= ifelse(os == "Windows", "wininet", "wget"))
 landtypes <- raster("../landtypes.tif") ### online raster doesn't keep CRS when downloading using "wininet"
 
 ### loading initial biomass
 dtaDir <- "../initialBiomass"
+=======
+download.file(url, tmpFile, method="wget")
+landtypes <- raster("../landtypes.tif")
+
+### loading initial biomass
+dtaDir <- "../initialBiomass/"
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
 biomassKnn <- stack(paste0(dtaDir, "/initBiomassKnnTonsPerHa-", a, "-", spp, ".tif"))
 names(biomassKnn) <- paste0(spp, "_tonsPerHa")
 # removing inactive pixels
@@ -54,11 +66,17 @@ biomassKnnTotal_mean <- mean(values(biomassKnnTotal), na.rm = T)
 ## initial proportion (Knn estimates)
 biomassKnnProp <- biomassKnn/biomassKnnTotal
 
+<<<<<<< HEAD
 ################################################################
 ################################################################
 #################  function that computes dissimilarity between
 #################  two communities
 brayDistFnc <- function(x) {
+=======
+
+#x <- c(biomassKnnProp[[1:8]][i], xProp[[1:8]][i])
+brayDistFnc <- function(x) { # both
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
     nLayers <- length(x)
     # i <- 9791
     if(anyNA(x)) {
@@ -89,6 +107,7 @@ brayDist <- foreach(i = seq_along(simDir)) %dopar% {
     crs(x) <- crs(landtypes)
     extent(x) <- extent(landtypes)
     x[is.na(landtypes)] <- NA
+<<<<<<< HEAD
     
     ### convert to tons per ha
     x <- x / 100
@@ -105,6 +124,24 @@ brayDist <- foreach(i = seq_along(simDir)) %dopar% {
     ## proportions
     # x <- x/biomassTotal
     # x <- stack(x, biomassKnnProp)
+=======
+
+    ### convert to tons per ha
+    x <- x / 100
+
+
+
+    ### total biomass
+    biomassTotal <- sum(x)
+    biomassTotal_mean <- mean(values(biomassTotal), na.rm = T)
+
+    ###  compare with Knn estimates and compute metrics
+    ## absolute abundances
+    # x <- stack(x, biomassKnn)
+    ## proportions
+    x <- x/biomassTotal
+    x <- stack(x, biomassKnnProp)
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
     
     
     
@@ -114,7 +151,11 @@ brayDist <- foreach(i = seq_along(simDir)) %dopar% {
                    brayDist = calc(x,  brayDistFnc))
     print(i)
     return(result)
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
 }
 stopCluster(cl)
 #############################
@@ -124,4 +165,9 @@ totalBiomass <- stack(lapply(brayDist, function(x) x$biomassTotal))
 brayDist <- stack(lapply(brayDist, function(x) x$brayDist))
 
 save(totalBiomass, file = "totalBiomass.RData")
+<<<<<<< HEAD
 save(brayDist, file = "brayDist.RData")
+=======
+save(brayDist, file = "brayDist.RData")
+
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0

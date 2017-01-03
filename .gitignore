@@ -7,3 +7,4 @@
 processedOutputs/*.csv
 *processedOutputs*
 *~
+biasCorrection/NorthShore/processedOutputs/

@@ -17,8 +17,6 @@ maxBiomassCoeff <- seq(0.5, 1, by = 0.05)
 propMaxBiomassBoost <- list(ABIE.BAL = seq(0.2, 0.9, by = 0.025))
 
 
-targetInputs <- baselineInputs ## may be the same, or different than baseline inputs
-
 maxBiomassRatios <- baselineInputs %>%
     filter(year == 0) %>%
     group_by(landtype) %>%
@@ -44,11 +42,12 @@ files <- character()
 ### applying correctionFactors
 
 for (k in maxBiomassCoeff) {
-    intermediateInputs <- targetInputs
-    intermediateInputs[c("maxANPP", "maxB")] <- intermediateInputs[c("maxANPP", "maxB")] * k
+    intermediateInputs <- baselineInputs
+    intermediateInputs[c("maxANPP", "maxB")] <- round(intermediateInputs[c("maxANPP", "maxB")] * k)
     
     for (i in seq_along(correctionFactors)) {
         sp <- names(correctionFactors)[i]
+        spIndex <- which(intermediateInputs$species == sp)
         nPad <- max(nchar(propMaxBiomassBoost[[i]]))
         
         for (j in seq_along(correctionFactors[[i]])) {
@@ -57,7 +56,11 @@ for (k in maxBiomassCoeff) {
             corrFactor <- correctionFactors[[i]][j]
             
             finalInputs <- intermediateInputs
+<<<<<<< HEAD
             finalInputs[c("maxANPP", "maxB")] <- round(finalInputs[finalInputs$species == sp, c("maxANPP", "maxB")] *
+=======
+            finalInputs[spIndex, c("maxANPP", "maxB")] <- round(finalInputs[spIndex, c("maxANPP", "maxB")] *
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
                                                            corrFactor)
             
             target <- propMaxBiomassBoost[[i]][j]
@@ -86,7 +89,7 @@ for (k in maxBiomassCoeff) {
             cat("\n")
             cat(paste0(c(">>", "species" , "\taverageMaxBiomassTarget", "finalMultiplier"), collapse = "\t"))
             cat("\n")
-            cat(paste0(c(">>", sp, target, "\t", round(corrFactor[j], 3)),  collapse = "\t"))
+            cat(paste0(c(">>", sp, target, "\t", round(corrFactor, 4)),  collapse = "\t"))
             cat("\n")
             cat("\n")
             cat(paste0(c(">>",colnames(baselineInputs)), collapse="\t"))

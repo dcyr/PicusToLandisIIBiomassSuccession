@@ -49,6 +49,41 @@ biomassKnnTotal_mean <- mean(values(biomassKnnTotal), na.rm = T)
 biomassKnnProp <- biomassKnn/biomassKnnTotal
 #xMatKnn <- values(biomassKnnProp)
 
+<<<<<<< HEAD
+
+
+
+################################################################
+################################################################
+### loading 'totalBiomass' and reformating for analysis and plotting 
+totalBiomass <- get(load("../processedOutputs/totalBiomass.RData"))
+simID <-  str_pad(gsub("[^0-9]", "", names(totalBiomass)), 3, pad = "0")
+
+totalBiomassDF <- rasterToPoints(totalBiomass)
+colnames(totalBiomassDF)[3:ncol(totalBiomassDF)] <- simID
+totalBiomassDF <- melt(as.data.frame(totalBiomassDF), id.vars = c("x", "y"),
+                       variable.name = "simID", value.name = "biomassTotal_tonsPerHa")
+rm(totalBiomass)
+
+### loading 'brayDist' and reformating for analysis and plotting 
+brayDist <- get(load("../processedOutputs/brayDist.RData"))
+simID <-  str_pad(gsub("[^0-9]", "", names(brayDist)), 3, pad = "0")
+brayDistDF <- rasterToPoints(brayDist)
+colnames(brayDistDF)[3:ncol(brayDistDF)] <- simID
+brayDistDF <- melt(as.data.frame(brayDistDF), id.vars = c("x", "y"),
+                   variable.name = "simID", value.name = "brayDist")
+rm(brayDist)
+
+
+require(dplyr)
+totalBiomassSummary <- totalBiomassDF %>%
+    group_by(simID) %>%
+    summarise(totalBiomassMean_tonsPerHa = mean(biomassTotal_tonsPerHa))
+
+brayDistSummary <- brayDistDF %>%
+    group_by(simID) %>%
+    summarise(brayDist_mean = mean(brayDist))
+=======
 
 
 
@@ -88,6 +123,40 @@ calibSummary <- merge(simInfo, brayDistSummary)
 calibSummary <- merge(calibSummary, totalBiomassSummary)
 
 
+foo <- calibSummary %>%
+    mutate(brayDistDiff = brayDist_mean-min(brayDist_mean))
+
+colScale <- scale_color_gradientn(name = "diff", limits = c(0,0.25),
+                                 colours = rev(c("lightblue", "gold2", "darkred")),
+                                 values = c(0, 0.01, 1))
+
+
+p <- ggplot(foo, aes(x = maxBiomassMultiplier, y = totalBiomassMean_tonsPerHa,
+                              group = averageMaxBiomassTarget,
+                              colour = brayDistDiff)) +
+    geom_line(size = 0.5) +
+    colScale +
+    #scale_colour_discrete(palette = "Set1") +
+    geom_hline(aes(yintercept=biomassKnnTotal_mean))
+
+
+png(filename="totalBiomassCalibration.png",
+    width = 6, height = 3, units = "in", res = 300, pointsize=8)
+
+print(p +
+          labs(y =  "Average total biomass (tons/ha)",
+               x = "maxB multiplier (all species)",
+               title = "Calibration of total biomass (all species)"))
+
+
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
+
+simInfo[,"simID"] <- str_pad(simInfo[,"simDir"], 3, pad = "0")
+calibSummary <- merge(simInfo, brayDistSummary)
+calibSummary <- merge(calibSummary, totalBiomassSummary)
+
+
+<<<<<<< HEAD
 calibSummary <- calibSummary %>%
     mutate(brayDistDiff = brayDist_mean-min(brayDist_mean))
 
@@ -101,8 +170,25 @@ calibSummary <- calibSummary %>%
     group_by(averageMaxBiomassTarget) %>%
     summarize(totalBiomassLabel = totalBiomassMean_tonsPerHa[which.max(maxBiomassMultiplier)]) %>%
     merge(calibSummary)
+=======
+p <- ggplot(calibSummary, aes(x = averageMaxBiomassTarget, y = brayDist_mean,
+                              group = maxBiomassMultiplier,
+                              colour = maxBiomassMultiplier)) +
+    geom_line() +
+    #scale_colour_discrete(palette = "Set1") +
+    geom_vline(aes(xintercept=0.2169649), colour = "blue")
 
 
+png(filename="ABIE.BAL_relPropCalibration.png",
+    width = 6, height = 3, units = "in", res = 300, pointsize=8)
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
+
+print(p +
+          labs(y = "Average Bray-Curtis dissimilarity",
+               x = "maxB ABIE.BAL : maxB landtype (ratio)",
+               title = "calibration of ABIE.BAL's relative importance"))
+
+<<<<<<< HEAD
 
 colScale <- scale_color_gradientn(name = "diff", limits = c(0,0.25),
                                  colours = rev(c("lightblue", "gold2", "darkred")),
@@ -172,6 +258,10 @@ print(p +
 
 
 
+=======
+
+
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
 dev.off()
 
 
@@ -179,7 +269,11 @@ dev.off()
 # #############################################################
 # #############################################################
 # ###### maps !
+<<<<<<< HEAD
 # targetSubsample <- c(.2, .425, .675, 0.9)
+=======
+# targetSubsample <- seq(.3, .9, 0.15)
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
 # maxBmultSubsample <- seq(0.5, 1, 0.1)
 # 
 # simInfoSubsample <- simInfo %>%
@@ -191,7 +285,11 @@ dev.off()
 # 
 # require(doSNOW)
 # require(parallel)
+<<<<<<< HEAD
 # cl = makeCluster(4, outfile = "") ##
+=======
+# cl = makeCluster(6, outfile = "") ##
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
 # registerDoSNOW(cl)
 # 
 # foreach(sp = spp) %dopar% {
@@ -199,9 +297,14 @@ dev.off()
 #     require(ggplot2)
 #     require(reshape2)
 #     require(stringr)
+<<<<<<< HEAD
 # 
 #     for (i in folderSubset) {#seq_along(simDir)) {
 # 
+=======
+#     for (i in folderSubset) {#seq_along(simDir)) {
+#         
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
 #         target <- simInfo[i, "averageMaxBiomassTarget"]
 #         outputDir <- paste0("../", simDir[i], "/output/biomass")
 #         outputs <- list.files(outputDir)
@@ -216,6 +319,7 @@ dev.off()
 #     crs(x) <- crs(landtypes)
 #     extent(x) <- extent(landtypes)
 #     x[is.na(landtypes)] <- NA
+<<<<<<< HEAD
 # 
 #     ### convert to tons per ha
 #     x <- x / 100
@@ -242,16 +346,39 @@ dev.off()
 #     diffSmoothed <- list()
 #     for(j in 1:nlayers(diff)) {
 #         diffSmoothed[[j]] <- focal(diff[[j]], matrix(1, ncol = 9, nrow = 9), mean, na.rm = T)
+=======
+#     
+#     ### convert to tons per ha
+#     x <- x / 100
+#     
+#     
+#     ### identifying layers
+#     layerNames <- paste(simInfoSubsample$averageMaxBiomassTarget,
+#                         simInfoSubsample$maxBiomassMultiplier, sep = "_")
+#     
+#     
+#     diff <- x - biomassKnn[[grep(sp, names(biomassKnn))]]
+#     ## smoothing to increase contrast, better visual. of spatial patterns
+#     diffSmoothed <- list()
+#     for(j in 1:nlayers(diff)) {
+#         diffSmoothed[[j]] <- focal(diff[[j]], matrix(1, ncol = 5, nrow = 5), mean, na.rm = T) 
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
 #     }
 #     rm(list = c("diff", "x"))
 #     diffSmoothed <- stack(diffSmoothed)
 #     diffSmoothed[is.na(landtypes)] <- NA
+<<<<<<< HEAD
 # 
 # 
+=======
+#     
+#     
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
 #     df <- rasterToPoints(diffSmoothed)
 #     df <- as.data.frame(df)
 #     colnames(df)[3:ncol(df)] <-  layerNames
 #     df <- melt(df, id.vars = c("x", "y"), variable.name = "layer")#, measure.vars = "biomassDiff_tonsPerHa")
+<<<<<<< HEAD
 # 
 #     layerInfo <- str_split(df$layer, "_")
 # 
@@ -270,6 +397,17 @@ dev.off()
 #     colScale <- scale_fill_gradient2(name = "diff",
 #                                      low = "#4477AA", mid = "white", high = "#BB4444", midpoint = 0)
 # 
+=======
+#     
+#     layerInfo <- str_split(df$layer, "_")
+#     
+#     df[, "spRelmaxB"] <- paste("ABIE.BAL maxB:maxBtotal =", as.numeric(lapply(layerInfo, function(x) x[1])))
+#     df[, "maxBMultiplier"] <- paste("maxB multiplier =", as.numeric(lapply(layerInfo, function(x) x[2])))
+#     
+#     colScale <- scale_fill_gradient2(name = "diff",
+#                                      low = "#4477AA", mid = "white", high = "#BB4444", midpoint = 0)
+#     
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
 #     p <- ggplot(data = df, aes(x = x, y = y, fill = value)) +
 #         theme_dark() +
 #         geom_raster() +
@@ -277,6 +415,7 @@ dev.off()
 #         colScale +
 #         facet_grid(spRelmaxB ~ maxBMultiplier) +
 #         theme(axis.text = element_blank(),
+<<<<<<< HEAD
 #               axis.title = element_blank(),
 #               axis.ticks = element_blank())
 # 
@@ -310,6 +449,20 @@ dev.off()
 #                             #data = labelDF,  ## don't work with ggplot2 2.2.0
 #                             hjust = 1, size = 2.75, fontface = "bold"))
 #                   
+=======
+#               #axis.text.y =  element_blank(),
+#               axis.title = element_blank(),
+#               axis.ticks = element_blank())#,
+#     #axis.ticks = element_blank())
+#     
+#     
+#     png(filename = paste0("diffInit_", sp, ".png"),
+#         width = 12, height = 8, units = "in", res = 600, pointsize=10)
+#     
+#     print(p + labs(title = paste0("Difference between initial biomass after LANDIS spinup and Knn estimations\n", sp)))
+#     
+#     
+>>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
 #     dev.off()
 # }
 # 

@@ -13,9 +13,9 @@ colnames(baselineInputs) <- c("year", "landtype", "species", "probEst", "maxANPP
 
 ### these are targetted proportion of maxBiomass for given spp
 
-maxBiomassCoeff <- seq(0.5, 1, by = 0.05)
-propMaxBiomassBoost <- list(ABIE.BAL = seq(0.2, 0.9, by = 0.025))
-
+maxBiomassCoeff <- seq(0.75, 1.25, by = 0.05)
+propMaxBiomassBoost <- list(ABIE.BAL = seq(0.2, 1, by = 0.05))
+spinupMortalityFraction <- seq(0, .5, by = 0.1)
 
 maxBiomassRatios <- baselineInputs %>%
     filter(year == 0) %>%
@@ -56,18 +56,21 @@ for (k in maxBiomassCoeff) {
             corrFactor <- correctionFactors[[i]][j]
             
             finalInputs <- intermediateInputs
-<<<<<<< HEAD
-            finalInputs[c("maxANPP", "maxB")] <- round(finalInputs[finalInputs$species == sp, c("maxANPP", "maxB")] *
-=======
+
             finalInputs[spIndex, c("maxANPP", "maxB")] <- round(finalInputs[spIndex, c("maxANPP", "maxB")] *
->>>>>>> 7761088794a6198bec75a25aef6dc1081a34eac0
                                                            corrFactor)
             
             target <- propMaxBiomassBoost[[i]][j]
+            
             ##### writing to file
             fileName <- paste0("biomass-succession-dynamic-inputs_",
-                               str_pad(propMaxBiomassBoost[[i]][j], ifelse(target != 1, nPad, 0), pad = "0", side = "right"),
-                               "_maxBk_",k, ".txt")
+                               "sppRatio",
+                               ifelse(target == 1, "1.00",
+                                      str_pad(target, nPad, pad = "0", side = "right")),
+                               "_maxBmult",
+                               ifelse(k == 1, "1.00",
+                                      str_pad(k, nPad, pad = "0", side = "right")),
+                               ".txt")
             #
             files <- append(files, fileName)
             sink(fileName)
@@ -102,11 +105,9 @@ for (k in maxBiomassCoeff) {
                         quote=FALSE,
                         #eol = "\r\n" #will produce Windows' line endings on a Unix-alike OS
                         eol = "\n" #default line endings on windows system.
-            )
-            
+            )  
         }
     }
-    
 }
 
 
@@ -120,32 +121,50 @@ for (k in maxBiomassCoeff) {
 ### generating simulation packages
 
 sp <- "ABIE.BAL"
-nSims <- length(files)
-tmp <- str_split(gsub(".txt", "", files), "_")
+nSims <- length(files) * length(spinupMortalityFraction)
+tmp <- str_split(gsub(".txt|sppRatio|maxBmult", "", files), "_")
 targetABIEBAL <- as.numeric(lapply(tmp, function(x) x[2]))
-maxBiomassCoeff <- as.numeric(lapply(tmp, function(x) x[4]))
-correctionFactors
-for (i in seq_along(files)) {
+maxBiomassCoeff <- as.numeric(lapply(tmp, function(x) x[3]))
+
+s <- 0
+for (f in seq_along(spinupMortalityFraction)) {
+    smf <- spinupMortalityFraction[f]
+    con <- file("../biomass-succession-main-inputs.txt")
+    mainInputs <- readLines(con)
+    index <- grep("SpinupMortalityFraction", mainInputs)
+    mainInputs[index] <- paste("SpinupMortalityFraction", smf)
     
-    corrFactor <- correctionFactors[[sp]][which(round(propMaxBiomassBoost[[sp]] - targetABIEBAL[i], 3) == 0)]
+    mainInputFile <- paste0("biomass-succession-main-inputs_", smf, ".txt")
+    sink(mainInputFile)
+    cat(paste0(mainInputs, "\n"))
+    sink()
     
-    simName <- str_pad(i, nchar(nSims), pad = "0")
-    simDir <- paste0("../", simName)
-    dir.create(simDir)
-    file.copy("../scenario.txt", simDir, overwrite = T)
-    file.copy(files[i], paste(simDir, "biomass-succession-dynamic-inputs.txt", sep = "/"), overwrite = T)
     
-    df <- data.frame(simDir = simName, species = sp,
-                     averageMaxBiomassTarget = targetABIEBAL[i],
-                     spAnppMultiplier = corrFactor, 
-                     spBiomassMultiplier = corrFactor,
-                     maxBiomassMultiplier = maxBiomassCoeff[i])
-    if(i == 1) {
-        simInfo <- df
-    } else {
-        simInfo <- rbind(simInfo, df)
+    for (i in seq_along(files)) {
+        
+        corrFactor <- correctionFactors[[sp]][which(round(propMaxBiomassBoost[[sp]] - targetABIEBAL[i], 3) == 0)]
+        
+    
+        simName <- str_pad(s, nchar(nSims), pad = "0")
+        simDir <- paste0("../", simName)
+        dir.create(simDir)
+        file.copy("../scenario.txt", simDir, overwrite = T)
+        file.copy(mainInputFile, paste(simDir, "biomass-succession-main-inputs.txt", sep = "/"), overwrite = T)
+        file.copy(files[i], paste(simDir, "biomass-succession-dynamic-inputs.txt", sep = "/"), overwrite = T)
+        
+        df <- data.frame(simDir = simName, species = sp,
+                         averageMaxBiomassTarget = targetABIEBAL[i],
+                         spAnppMultiplier = corrFactor, 
+                         spBiomassMultiplier = corrFactor,
+                         maxBiomassMultiplier = maxBiomassCoeff[i],
+                         spinupMortalityFraction = smf)
+        if(s == 0) {
+            simInfo <- df
+        } else {
+            simInfo <- rbind(simInfo, df)
+        }
+        s <- s + 1  
     }
-    
 }
 write.csv(simInfo, file = "../simInfo.csv", row.names = F)
 

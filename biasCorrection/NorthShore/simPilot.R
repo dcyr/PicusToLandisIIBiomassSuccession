@@ -13,7 +13,7 @@ n <- floor(detectCores() * 0.90)
 cl = makeCluster(n, outfile = "") ## 
 registerDoSNOW(cl)
 
-foreach(i = 1:20) %dopar% { # length(simDir)
+foreach(i = 1:length(simDir)) %dopar% { # length(simDir)
     if (i <= n) {  ### to reduce the probability of several processes
         ### trying to access the same file at the same time
         Sys.sleep(runif(1)*2)

@@ -75,36 +75,36 @@ for (k in maxBiomassCoeff) {
             files <- append(files, fileName)
             sink(fileName)
             cat('LandisData "Dynamic Input Data"')
-            cat("\n")
-            cat("\n")
+            cat("\r\n")
+            cat("\r\n")
             cat(">> Warning - This is a bias-corrected file")
-            cat("\n")
-            cat("\n")
+            cat("\r\n")
+            cat("\r\n")
             cat(">> The following multiplier was applied to all species's original maxB and maxANPP")
-            cat("\n")
+            cat("\r\n")
             cat(paste0(c(">>", "multiplier"), collapse = "\t"))
-            cat("\n")
+            cat("\r\n")
             cat(paste0(c(">>", k), collapse = "\t"))
-            cat("\n")
-            cat("\n")
+            cat("\r\n")
+            cat("\r\n")
             cat(">> The following species' parameters (maxANPP and maxB) have also been modified")
-            cat("\n")
-            cat("\n")
+            cat("\r\n")
+            cat("\r\n")
             cat(paste0(c(">>", "species" , "\taverageMaxBiomassTarget", "finalMultiplier"), collapse = "\t"))
-            cat("\n")
+            cat("\r\n")
             cat(paste0(c(">>", sp, target, "\t", round(corrFactor, 4)),  collapse = "\t"))
-            cat("\n")
-            cat("\n")
+            cat("\r\n")
+            cat("\r\n")
             cat(paste0(c(">>",colnames(baselineInputs)), collapse="\t"))
-            cat("\n")
-            cat("\n")
+            cat("\r\n")
+            cat("\r\n")
             sink()
             ## param table
             write.table(finalInputs, file=fileName,
                         append=TRUE, row.names=FALSE, col.names=FALSE, sep="\t",
                         quote=FALSE,
                         #eol = "\r\n" #will produce Windows' line endings on a Unix-alike OS
-                        eol = "\n" #default line endings on windows system.
+                        eol = "\r\n" #default line endings on windows system.
             )  
         }
     }
@@ -136,7 +136,7 @@ for (f in seq_along(spinupMortalityFraction)) {
     
     mainInputFile <- paste0("biomass-succession-main-inputs_", smf, ".txt")
     sink(mainInputFile)
-    cat(paste0(mainInputs, "\n"))
+    cat(paste0(mainInputs, "\r\n"))
     sink()
     
     

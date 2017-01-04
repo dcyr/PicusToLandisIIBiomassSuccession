@@ -1,5 +1,5 @@
 rm(list = ls())
-setwd("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/NorthShore")
+setwd("/media/dcyr/Win/Users/Dominic Cyr/Desktop/NorthShore/")
 
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
@@ -49,78 +49,88 @@ biomassKnnTotal_mean <- mean(values(biomassKnnTotal), na.rm = T)
 biomassKnnProp <- biomassKnn/biomassKnnTotal
 #xMatKnn <- values(biomassKnnProp)
 
-<<<<<<< HEAD
-
 
 
 ################################################################
-################################################################
-### loading 'totalBiomass' and reformating for analysis and plotting 
-totalBiomass <- get(load("../processedOutputs/totalBiomass.RData"))
-simID <-  str_pad(gsub("[^0-9]", "", names(totalBiomass)), 3, pad = "0")
+######
 
+outputs <- list.files()
+outputs <- outputs[grep("processedOutputs", outputs)]
+simNum <- gsub("[^0-9]", "", outputs)
+
+# available sims
+require(dplyr)
+simInfo <- simInfo %>%
+    filter(simDir %in% as.numeric(simNum))
+
+
+simID <- character()
+for (i in 1:nrow(simInfo)) {
+    simN <- str_pad(simInfo[i, "simDir"], 4, pad = "0")
+    simID <- append(simID, simN)
+    result <- get(load(paste0("processedOutputs_", simN, ".RData")))
+    
+    if (i == 1) {
+        totalBiomass <- result$biomassTotal
+        brayDissAbs <- result$brayDistAbs
+        brayDissRel <- result$brayDistRel
+    } else {
+        totalBiomass <- stack(totalBiomass, result$biomassTotal)
+        brayDissAbs <- stack(brayDissAbs, result$brayDistAbs)
+        brayDissRel <- stack(brayDissRel, result$brayDistRel)
+    }
+    
+}
+
+names(totalBiomass) <- names(brayDissAbs) <- names(brayDissRel) <- simID
+simID <-  gsub("X", "", simID)
+
+### reformatting 'totalBiomass' for analysis and plotting 
 totalBiomassDF <- rasterToPoints(totalBiomass)
 colnames(totalBiomassDF)[3:ncol(totalBiomassDF)] <- simID
 totalBiomassDF <- melt(as.data.frame(totalBiomassDF), id.vars = c("x", "y"),
                        variable.name = "simID", value.name = "biomassTotal_tonsPerHa")
 rm(totalBiomass)
 
-### loading 'brayDist' and reformating for analysis and plotting 
-brayDist <- get(load("../processedOutputs/brayDist.RData"))
-simID <-  str_pad(gsub("[^0-9]", "", names(brayDist)), 3, pad = "0")
-brayDistDF <- rasterToPoints(brayDist)
-colnames(brayDistDF)[3:ncol(brayDistDF)] <- simID
-brayDistDF <- melt(as.data.frame(brayDistDF), id.vars = c("x", "y"),
-                   variable.name = "simID", value.name = "brayDist")
-rm(brayDist)
+### reformatting 'brayDistAbs' and 'brayDistRel for analysis and plotting
+brayDissAbsDF <- rasterToPoints(brayDissAbs)
+colnames(brayDissAbsDF)[3:ncol(brayDissAbsDF)] <- simID
+brayDissAbsDF <- melt(as.data.frame(brayDissAbsDF), id.vars = c("x", "y"),
+                      variable.name = "simID", value.name = "brayDissAbs")
+rm(brayDissAbs)
+
+brayDissRelDF <- rasterToPoints(brayDissRel)
+colnames(brayDissRelDF)[3:ncol(brayDissRelDF)] <- simID
+brayDissRelDF <- melt(as.data.frame(brayDissRelDF), id.vars = c("x", "y"),
+                      variable.name = "simID", value.name = "brayDissRel")
+rm(brayDissRel)
 
 
-require(dplyr)
-totalBiomassSummary <- totalBiomassDF %>%
-    group_by(simID) %>%
-    summarise(totalBiomassMean_tonsPerHa = mean(biomassTotal_tonsPerHa))
-
-brayDistSummary <- brayDistDF %>%
-    group_by(simID) %>%
-    summarise(brayDist_mean = mean(brayDist))
-=======
-
-
-
-################################################################
-################################################################
-### loading 'totalBiomass' and reformating for analysis and plotting 
-totalBiomass <- get(load("../processedOutputs/totalBiomass.RData"))
-simID <-  str_pad(gsub("[^0-9]", "", names(totalBiomass)), 3, pad = "0")
-
-totalBiomassDF <- rasterToPoints(totalBiomass)
-colnames(totalBiomassDF)[3:ncol(totalBiomassDF)] <- simID
-totalBiomassDF <- melt(as.data.frame(totalBiomassDF), id.vars = c("x", "y"),
-                       variable.name = "simID", value.name = "biomassTotal_tonsPerHa")
-rm(totalBiomass)
-
-### loading 'brayDist' and reformating for analysis and plotting 
-brayDist <- get(load("../processedOutputs/brayDist.RData"))
-simID <-  str_pad(gsub("[^0-9]", "", names(brayDist)), 3, pad = "0")
-brayDistDF <- rasterToPoints(brayDist)
-colnames(brayDistDF)[3:ncol(brayDistDF)] <- simID
-brayDistDF <- melt(as.data.frame(brayDistDF), id.vars = c("x", "y"),
-                   variable.name = "simID", value.name = "brayDist")
-rm(brayDist)
-
+#### summarizing outputs
 
 require(dplyr)
 totalBiomassSummary <- totalBiomassDF %>%
     group_by(simID) %>%
     summarise(totalBiomassMean_tonsPerHa = mean(biomassTotal_tonsPerHa))
 
-brayDistSummary <- brayDistDF %>%
+brayDissAbsSummary <- brayDissAbsDF %>%
     group_by(simID) %>%
-    summarise(brayDist_mean = mean(brayDist))
+    summarise(brayDissAbs_mean = mean(brayDissAbs))
 
-simInfo[,"simID"] <- str_pad(simInfo[,"simDir"], 3, pad = "0")
-calibSummary <- merge(simInfo, brayDistSummary)
-calibSummary <- merge(calibSummary, totalBiomassSummary)
+brayDissRelSummary <- brayDissRelDF %>%
+    group_by(simID) %>%
+    summarise(brayDissRel_mean = mean(brayDissRel))
+
+simInfo[,"simID"] <- str_pad(simInfo[,"simDir"], 4, pad = "0")
+calibSummary <- merge(simInfo, totalBiomassSummary)
+calibSummary <- merge(calibSummary, brayDissAbsSummary)
+calibSummary <- merge(calibSummary, brayDissRelSummary)
+
+
+
+
+
+
 
 
 foo <- calibSummary %>%

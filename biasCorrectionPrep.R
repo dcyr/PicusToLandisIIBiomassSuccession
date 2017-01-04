@@ -13,9 +13,9 @@ colnames(baselineInputs) <- c("year", "landtype", "species", "probEst", "maxANPP
 
 ### these are targetted proportion of maxBiomass for given spp
 
-maxBiomassCoeff <- seq(0.75, 1.25, by = 0.05)
-propMaxBiomassBoost <- list(ABIE.BAL = seq(0.2, 1, by = 0.05))
-spinupMortalityFraction <- seq(0, .5, by = 0.1)
+maxBiomassCoeff <- seq(0.8, 1.2, by = 0.05)
+propMaxBiomassBoost <- list(ABIE.BAL = seq(0.2, 1, by = 0.1))
+spinupMortalityFraction <- c(0, 0.001, 0.01, 0.05, 0.1, 0.15, 0.2)
 
 maxBiomassRatios <- baselineInputs %>%
     filter(year == 0) %>%

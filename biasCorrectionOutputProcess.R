@@ -3,7 +3,7 @@ rm(list = ls())
 #setwd("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/NorthShore")
 os <- Sys.info()["sysname"]
 
-setwd("/media/dcyr/Win/Users/Dominic Cyr/Desktop/NorthShore/")
+setwd("/media/dcyr/Data/Sims/NorthShoreCalib3")
 
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
@@ -19,7 +19,6 @@ require(ggplot2)
 ################################################################
 ################################################################
 #################  Loading general inputs and initial conditions
-
 readURL <- "https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/"
 vegCodes <- read.csv(text = getURL(paste(readURL, "vegCodes.csv", sep="/")))
 ecozones <- read.csv(text = getURL(paste(readURL, "ecoNames.csv", sep="/")))
@@ -84,7 +83,7 @@ registerDoSNOW(cl)
 tInit <- Sys.time()
 nSims <- length(simDir)
 file.copy("../simInfo.csv", to = getwd(), overwrite = T)
-brayDist <- foreach(i = seq_along(simDir)) %dopar% {
+brayDist <- foreach(i = seq_along(simDir))  %dopar% { #) %dopar% { #
     require(raster)
     require(vegan)
     # target <- simInfo[i, "averageMaxBiomassTarget"]
@@ -114,11 +113,12 @@ brayDist <- foreach(i = seq_along(simDir)) %dopar% {
     # x <- x/biomassTotal
     # x <- stack(x, biomassKnnProp)
 
+    # computing bray diss from absolute abundances
     resultAbs <- calc(x,  brayDistFnc)
-    
-    x <- x/biomassTotal
+    # computing proportions
+    x <- x[[1:(nlayers(x)/2)]]/biomassTotal
     x <- stack(x, biomassKnnProp)
-    
+    # computing bray diss from relative abundances
     resultRel <- calc(x,  brayDistFnc)
     
     result <- list(biomassTotal = biomassTotal,
@@ -135,9 +135,3 @@ stopCluster(cl)
 #############################
 
 
-result$biomassTotal
-result$brayDistAbs
-result$brayDistRel
-plot(result$biomassTotal)
-plot(result$brayDistAbs)
-plot(result$brayDistRel)

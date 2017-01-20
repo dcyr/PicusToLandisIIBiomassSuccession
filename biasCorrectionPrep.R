@@ -1,5 +1,5 @@
 rm(list = ls())
-setwd("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/NorthShore")
+setwd("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/NorthShore3")
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
 setwd(wwd)
@@ -13,9 +13,9 @@ colnames(baselineInputs) <- c("year", "landtype", "species", "probEst", "maxANPP
 
 ### these are targetted proportion of maxBiomass for given spp
 
-maxBiomassCoeff <- seq(0.8, 1.2, by = 0.05)
+maxBiomassCoeff <- seq(0.5, 1, by = 0.05)
 propMaxBiomassBoost <- list(ABIE.BAL = seq(0.2, 1, by = 0.1))
-spinupMortalityFraction <- c(0, 0.001, 0.01, 0.05, 0.1, 0.15, 0.2)
+spinupMortalityFraction <- c(0, 0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.018)
 
 maxBiomassRatios <- baselineInputs %>%
     filter(year == 0) %>%

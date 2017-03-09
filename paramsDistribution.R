@@ -27,7 +27,7 @@ x <- x[grep("sep_", x)]
 #### subsample of folderNames
 #folderNames <- folderNames[grep("Acadian", folderNames)]#"AM|BSE|BSW|BP"
 areas <- unique(gsub("growthParam_|sep_|.RData", "", x))
-areas <- "NorthShore_5yrsTS"
+areas <- "ALPAC"
 for (a in areas) {
     require(reshape2)
     timestep <- ifelse(grepl("5yrsTS", a), 5, 10)

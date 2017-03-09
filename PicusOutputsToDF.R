@@ -42,7 +42,7 @@ areaFolders <- list.dirs(picusOutputDir, full.names=F, recursive=F)
 areas <- strsplit(areaFolders, " ")
 areas <- as.character(lapply(areas, function(x) gsub("DATA_", "", x[2])))
 #areaSubsample <- areas
-areaSubsample <- "NorthShore"
+areaSubsample <- "ALPAC"
 #
 folderNames <- areaFolders[areas %in% areaSubsample]
 folderNames <- paste(picusOutputDir, folderNames, sep="/")

@@ -1,5 +1,6 @@
 rm(list = ls())
-setwd("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/NorthShoreCalib3/")
+setwd("/media/dcyr/Data/Sims/NorthShoreCalib3")
+#setwd("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/NorthShoreCalib3/")
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
 setwd(wwd)
@@ -101,7 +102,7 @@ for (SMF in c(0.01, 0.018, 0.025)) {#
     cl = makeCluster(clusterN, outfile = "") ##
     registerDoSNOW(cl)
     ##
-    biomassCalib <- foreach(i = c(1, 901, 902))  %dopar% { #1:nrow(simInfo))
+    biomassCalib <- foreach(i = 1:nrow(simInfo))  %dopar% { #
         require(raster)
         require(reshape2)
         require(dplyr)
@@ -161,62 +162,72 @@ for (SMF in c(0.01, 0.018, 0.025)) {#
         } else {
             return(list(summary = mat))
         }
-        print(i)
+        print(paste(SMF, i))
     }
     stopCluster(cl)
-    names(biomassCalib) <- str_pad(simInfo$simDir, 3, pad = "0")
-    biomassCalibMaps <- rbindlist(biomassCalib)
-    save(biomassCalib, file = paste0("biomassCalibMaps_", smfString, ".RData"))
-
-    
-    #############################################################
-    #############################################################
-    #############################################################
-    ###### maps !
-    biomassCalib <- get(load(paste0("biomassCalibMaps_", smfString, ".RData")))
-    #############################################################
-    
-    ######################################################
-    ######################################################
-    ######################################################
-    ######################################################
-    ######   compute df for total
-    for (sp in c("total", spp)) {
-        
-        df <- biomassCalib %>%
-            filter(species == sp)
-        
-        colScale <- scale_fill_gradient2(name = "bias (tons/ha)",
-                                         low = "#4477AA", mid = "white", high = "#BB4444", midpoint = 0)
-        
-        
-        p <- ggplot(data = df, aes(x = x, y = y, fill = biomassResidual_tonsPerHa)) +
-            theme_dark() +
-            geom_raster() +
-            coord_fixed() +
-            colScale +
-            facet_grid(averageMaxBiomassTarget ~ maxBiomassMultiplier) +
-            theme(axis.text = element_blank(),
-                  axis.title = element_blank(),
-                  axis.ticks = element_blank())
-        
-        yMax <- layer_scales(p)$y$range$range[2]
-        xMax <- layer_scales(p)$x$range$range[2]
-        
-        png(filename = paste0("initBias_SMF",smfString, "_", sp, ".png"),
-            width = 10, height = 10, units = "in", res = 600, pointsize=10)
-        
-        print(p +
-                  labs(title = paste0("Difference between initial biomass after LANDIS spinup and Knn estimations\n", sp)) +
-                  geom_text(aes(x = xMax, y = yMax,
-                                label = "bias (global)"),
-                            hjust = 1, size = 2.25, fontface = 1) +
-                  geom_text(aes(x = xMax, y = yMax - 20000,
-                                label = biomassResidualMean_tonsPerHa),
-                            hjust = 1, size = 2.75, fontface = "bold")
-        )
-        dev.off()
-    } 
+    names(biomassCalib) <- simInfo$simID
+    subSample <- simInfoSubsample$simID
+    ### putting compiled results into tidy data.frame
+    extractElement <- function(x, element) {
+        lapply(x, function(y) y[[element]])
+    }
+    #
+    biomassCalibSummary <- do.call(rbind, extractElement(biomassCalib, element = "summary"))
+    rownames(biomassCalibSummary) <- 1:nrow(biomassCalibSummary)
+    save(biomassCalibSummary, file = paste0("biomassCalibSummary_", smfString, ".RData"))
+    #
+    biomassCalibMaps <- do.call(rbind, extractElement(biomassCalib[subSample], element = "map"))
+    rownames(biomassCalibMaps) <- 1:nrow(biomassCalibMaps)
+    save(biomassCalibMaps, file = paste0("biomassCalibMaps_", smfString, ".RData"))
+    # 
+    # #############################################################
+    # #############################################################
+    # #############################################################
+    # ###### maps !
+    # biomassCalib <- get(load(paste0("biomassCalibMaps_", smfString, ".RData")))
+    # #############################################################
+    # 
+    # ######################################################
+    # ######################################################
+    # ######################################################
+    # ######################################################
+    # ######   compute df for total
+    # for (sp in c("total", spp)) {
+    #     
+    #     df <- biomassCalib %>%
+    #         filter(species == sp)
+    #     
+    #     colScale <- scale_fill_gradient2(name = "bias (tons/ha)",
+    #                                      low = "#4477AA", mid = "white", high = "#BB4444", midpoint = 0)
+    #     
+    #     
+    #     p <- ggplot(data = df, aes(x = x, y = y, fill = biomassResidual_tonsPerHa)) +
+    #         theme_dark() +
+    #         geom_raster() +
+    #         coord_fixed() +
+    #         colScale +
+    #         facet_grid(averageMaxBiomassTarget ~ maxBiomassMultiplier) +
+    #         theme(axis.text = element_blank(),
+    #               axis.title = element_blank(),
+    #               axis.ticks = element_blank())
+    #     
+    #     yMax <- layer_scales(p)$y$range$range[2]
+    #     xMax <- layer_scales(p)$x$range$range[2]
+    #     
+    #     png(filename = paste0("initBias_SMF",smfString, "_", sp, ".png"),
+    #         width = 10, height = 10, units = "in", res = 600, pointsize=10)
+    #     
+    #     print(p +
+    #               labs(title = paste0("Difference between initial biomass after LANDIS spinup and Knn estimations\n", sp)) +
+    #               geom_text(aes(x = xMax, y = yMax,
+    #                             label = "bias (global)"),
+    #                         hjust = 1, size = 2.25, fontface = 1) +
+    #               geom_text(aes(x = xMax, y = yMax - 20000,
+    #                             label = biomassResidualMean_tonsPerHa),
+    #                         hjust = 1, size = 2.75, fontface = "bold")
+    #     )
+    #     dev.off()
+    # } 
     
 }
 

@@ -1,6 +1,6 @@
 # Picus outputs to LANDIS-II Biomass Succession dynamic inputs
 Dominic Cyr  
-Updated on Jul 15 2016
+Updated on Mar 13 2017
 
 -------
 
@@ -37,8 +37,9 @@ If you're not interested in the details but want to visualize what those sets of
     + [Lac Saint-Jean][18]
     + [Western Ontario][19]
     + [Sud Saint-Laurent][22]
+    + [Alberta - Pacific][23]
     + Manitoba - Saskatchewan (coming soon)
-    + Alberta - Pacific (coming soon)
+
 
 + Acadian Forest Project
     + [Acadian][12]
@@ -95,3 +96,4 @@ More details about those parameters, how they interact with each other, and how 
 [20]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_PM.md
 [21]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_BC.md
 [22]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_SudStl.md
+[23]: https://github.com/dcyr/PicusToLandisIIBiomassSuccession/blob/master/paramViz/ParamDistribution_ALPAC.md

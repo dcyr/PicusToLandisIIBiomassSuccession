@@ -35,10 +35,10 @@ areas <- unique(gsub("growthParam_|.RData", "", x))
 timestep <- 10
 
 #### configuration of landis Climate Change scenarios
-landisCCScenarios <- list(#RCP85 = list("0" = c("Baseline", "Baseline"),
-                          #              "10" = c("RCP85", "20112040"),
-                          #              "40" = c("RCP85", "20412070"),
-                          #              "70" = c("RCP85", "20712100")),
+landisCCScenarios <- list(RCP85 = list("0" = c("Baseline", "Baseline"),
+                                       "10" = c("RCP85", "20112040"),
+                                       "40" = c("RCP85", "20412070"),
+                                       "70" = c("RCP85", "20712100")),
                           # RCP45 = list("0" = c("Baseline", "Baseline"),
                           #              "10" = c("RCP45", "20112040"),
                           #              "40" = c("RCP45", "20412070"),

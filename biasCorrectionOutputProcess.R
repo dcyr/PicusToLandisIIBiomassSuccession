@@ -1,9 +1,9 @@
 rm(list = ls())
-#setwd("C:/Users/Dominic Cyr/Desktop/NorthShore")
-#setwd("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/NorthShore")
-os <- Sys.info()["sysname"]
 
-setwd("/media/dcyr/Data/Sims/NorthShoreCalib3")
+ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
+       setwd("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/NorthShoreCalib/"),
+       setwd("/media/dcyr/Data/Sims/NorthShoreCalib"))
+
 
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
@@ -29,10 +29,6 @@ a <- areas[1]
 spp <- as.character(vegCodes[vegCodes[, a] == 1, "LandisCode"] )
 
 ## loading landtypes
-#readURL <- "https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/raw/master/LandisInputs/"
-#tmpFile <- tempfile()
-#url <- paste(readURL, a, "/landtypes_", a, ".tif", sep="")
-#download.file(url, tmpFile, method= ifelse(os == "Windows", "wininet", "wget"))
 landtypes <- raster("../landtypes.tif") ### online raster doesn't keep CRS when downloading using "wininet"
 
 ### loading initial biomass

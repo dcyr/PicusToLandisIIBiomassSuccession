@@ -1,8 +1,10 @@
 rm(list = ls())
+a <- "NorthShore"
+initDir <- paste("..", a, sep = "/")
+###
 outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
-                  "/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/NorthShoreCalib/",
-                  "/media/dcyr/Data/Sims/NorthShoreCalib")
-
+                    "/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/NorthShoreCalib/",
+                    "/media/dcyr/Data/Sims/NorthShoreCalib")
 ###
 setwd("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/")
 wwd <- paste(paste(getwd(), Sys.Date(), sep = "/"))
@@ -11,8 +13,7 @@ setwd(wwd)
 rm(wwd)
 
 ###
-a <- "NorthShore"
-initDir <- paste("..", a, sep = "/")
+
 
 require(raster)
 require(RCurl)
@@ -88,9 +89,9 @@ for (SMF in c(0.018)) {#c(0.01, 0.018, 0.025)) {#
     #SMF <- 0.018  
     smfString <- str_pad(SMF, 5, pad = "0", side = "right")
     
-    ### first pass - North Shore
-    maxBmult <- c(0.55, 0.7, 0.85, 1)
-    AbTargetRatio <- c(0.2, 0.4, 0.6, 0.8)
+    # ### first pass - North Shore
+    # maxBmult <- c(0.55, 0.7, 0.85, 1)
+    # AbTargetRatio <- c(0.2, 0.4, 0.6, 0.8)
     
     ### second pass - North Shore
     maxBmult <- c(0.7)

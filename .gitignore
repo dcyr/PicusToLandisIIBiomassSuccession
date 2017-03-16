@@ -5,6 +5,5 @@
 *.html
 *.pdf
 processedOutputs/*.csv
-*processedOutputs*
 *~
 biasCorrection/*/processedOutputs/

@@ -6,12 +6,11 @@ outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
                     "/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/NorthShoreCalib/",
                     "/media/dcyr/Data/Sims/NorthShoreCalib")
 ###
-setwd("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/")
+setwd(paste("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/", a, sep = "/"))
 wwd <- paste(paste(getwd(), Sys.Date(), sep = "/"))
 dir.create(wwd)
 setwd(wwd)
 rm(wwd)
-
 ###
 
 

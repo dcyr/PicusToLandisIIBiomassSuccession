@@ -81,7 +81,7 @@ registerDoSNOW(cl)
 dfSummary <- foreach(i = 1:nrow(simInfo), .combine = "rbind") %dopar% {
     require(raster)
     require(stringr)
-    simN <- str_pad(simInfo[i, "simDir"], 3, pad = "0")
+    simN <- str_pad(simInfo[i, "simDir"], max(nchar(simNum)), pad = "0")
     
     biomassTotal <- raster(paste0(outputDir, "/biomassTotal_", simN, ".tif"))
     distAbs <- raster(paste0(outputDir, "/distAbs_", simN, ".tif"))

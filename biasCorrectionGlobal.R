@@ -83,9 +83,9 @@ dfSummary <- foreach(i = 1:nrow(simInfo), .combine = "rbind") %dopar% {
     require(stringr)
     simN <- str_pad(simInfo[i, "simDir"], 3, pad = "0")
     
-    biomassTotal <- raster(paste0("../processedOutputs/biomassTotal_", simN, ".tif"))
-    distAbs <- raster(paste0("../processedOutputs/distAbs_", simN, ".tif"))
-    distRel <- raster(paste0("../processedOutputs/distRel_", simN, ".tif"))
+    biomassTotal <- raster(paste0(outputDir, "/biomassTotal_", simN, ".tif"))
+    distAbs <- raster(paste0(outputDir, "/distAbs_", simN, ".tif"))
+    distRel <- raster(paste0(outputDir, "/distRel_", simN, ".tif"))
     
     x <- data.frame(biomassTotalMean_tonsPerHa =  mean(values(biomassTotal), na.rm = T),
                     brayDissAbs_mean =  mean(values(distAbs), na.rm = T),

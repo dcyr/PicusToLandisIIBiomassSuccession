@@ -1,10 +1,10 @@
 rm(list = ls())
-a <- "LSJ"
+a <- "NorthShore"
 initDir <- paste("..", a, sep = "/")
 ###
 outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
-                    "/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/LSJCalib/",
-                    "/media/dcyr/Data/Sims/LSJCalib")
+                    paste0("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/", a, "Calib"),
+                    paste0("/media/dcyr/Data/Sims/", a, "Calib"))
 ###
 setwd(paste("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/", a, sep = "/"))
 wwd <- paste(paste(getwd(), Sys.Date(), sep = "/"))
@@ -79,7 +79,7 @@ clusterN <-  max(1, floor(0.4*detectCores()))  ### choose number of nodes to add
 #######  subsetting simulations
 
 ## producing maps?
-mapProduce <- F
+mapProduce <- T
 
 
 for (SMF in c(0.018)) {#c(0.01, 0.018, 0.025)) {#
@@ -87,8 +87,8 @@ for (SMF in c(0.018)) {#c(0.01, 0.018, 0.025)) {#
     smfString <- str_pad(SMF, 5, pad = "0", side = "right")
     
     # ### first pass - North Shore
-    maxBmult <- 1 #c(0.55, 0.7, 0.85, 1)
-    AbTargetRatio <- 0.18#c(0.2, 0.4, 0.6, 0.8)
+    maxBmult <- c(0.55, 0.7, 0.85, 1)
+    AbTargetRatio <- c(0.2, 0.4, 0.6, 0.8)
     
     simInfoSubsample <- simInfo %>%
         filter(spinupMortalityFraction %in% SMF,
@@ -297,9 +297,6 @@ for (SMF in c(0.018)) {#c(0.01, 0.018, 0.025)) {#
         
         dev.off() 
     }
-    
-    
-    
 }
 
 

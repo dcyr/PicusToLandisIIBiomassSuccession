@@ -1,7 +1,10 @@
 rm(list = ls())
 
+areas <- "NorthShore"
+a <- areas[1]
+
 ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
-       setwd("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/NorthShoreCalib/"),
+       setwd("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/NorthShoreCalib"),
        setwd("/media/dcyr/Data/Sims/NorthShoreCalib"))
 
 
@@ -9,6 +12,14 @@ wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
 setwd(wwd)
 rm(wwd)
+
+##################
+require(doSNOW)
+require(parallel)
+clusterN <-  max(1, floor(0.8*detectCores()))  ## 5 for LSJ, 10 for NorthShore...
+print(paste(clusterN, "cores"))
+##################
+
 
 require(raster)
 require(RCurl)
@@ -24,8 +35,7 @@ vegCodes <- read.csv(text = getURL(paste(readURL, "vegCodes.csv", sep="/")))
 ecozones <- read.csv(text = getURL(paste(readURL, "ecoNames.csv", sep="/")))
 
 ###
-areas <- "NorthShore"
-a <- areas[1]
+
 spp <- as.character(vegCodes[vegCodes[, a] == 1, "LandisCode"] )
 
 ## loading landtypes
@@ -70,9 +80,7 @@ brayDistFnc <- function(x) { # both
 }
 
 
-require(doSNOW)
-require(parallel)
-clusterN <-  max(1, floor(0.9*detectCores()))  ### choose number of nodes to add to cluster.
+
 # #######
 cl = makeCluster(clusterN, outfile = "") ##
 registerDoSNOW(cl)
@@ -110,21 +118,26 @@ brayDist <- foreach(i = seq_along(simDir))  %dopar% { #) %dopar% { #
     # x <- stack(x, biomassKnnProp)
 
     # computing bray diss from absolute abundances
-    resultAbs <- calc(x,  brayDistFnc)
+    distAbs <- calc(x,  brayDistFnc)
+    
     # computing proportions
     x <- x[[1:(nlayers(x)/2)]]/biomassTotal
     x <- stack(x, biomassKnnProp)
     # computing bray diss from relative abundances
-    resultRel <- calc(x,  brayDistFnc)
+    distRel <- calc(x,  brayDistFnc)
     
-    result <- list(biomassTotal = biomassTotal,
-                   brayDistAbs = resultAbs,
-                   brayDistRel = resultRel)
-    save(result, file = paste0("processedOutputs_", simDir[i], ".RData"))
+    # result <- list(biomassTotal = biomassTotal,
+    #                brayDistAbs = distAbs,
+    #                brayDistRel = distRel)
+    
+    writeRaster(biomassTotal, file = paste0("biomassTotal_", simDir[i], ".tif"), overwrite = T)
+    writeRaster(distAbs, file = paste0("distAbs_", simDir[i], ".tif"), overwrite = T)
+    writeRaster(distRel, file = paste0("distRel_", simDir[i], ".tif"), overwrite = T)
     meanProcessTime <- (Sys.time()-tInit)/i
     ETC <- Sys.time() + (nSims-i)*meanProcessTime
     print(paste("outputs", i, "of", nSims, "completed"))
     print(paste("estimated time at completion:", ETC))
+    removeTmpFiles(h = 0.15)
 }
 stopCluster(cl)
 #############################

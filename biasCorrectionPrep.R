@@ -1,5 +1,5 @@
 rm(list = ls())
-setwd("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/NorthShore3")
+setwd("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/Acadian")
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
 setwd(wwd)
@@ -11,11 +11,6 @@ require(stringr)
 baselineInputs <- read.table("../biomass-succession-dynamic-inputs.txt", skip = 1, comment.char = ">")
 colnames(baselineInputs) <- c("year", "landtype", "species", "probEst", "maxANPP", "maxB")
 
-### these are targetted proportion of maxBiomass for given spp
-
-maxBiomassCoeff <- seq(0.5, 1, by = 0.05)
-propMaxBiomassBoost <- list(ABIE.BAL = seq(0.2, 1, by = 0.1))
-spinupMortalityFraction <- c(0, 0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.018)
 
 maxBiomassRatios <- baselineInputs %>%
     filter(year == 0) %>%
@@ -24,6 +19,17 @@ maxBiomassRatios <- baselineInputs %>%
     merge(baselineInputs) %>%
     group_by(species) %>%
     summarise(maxBiomassRatio = mean(maxB)/mean(maxB_landtype))
+maxBiomassRatios <- as.data.frame(maxBiomassRatios)
+
+
+### these are targetted proportion of maxBiomass for given spp
+
+maxBiomassCoeff <- seq(0.5, 1, by = 0.05)
+propMaxBiomassBoost <- list(ABIE.BAL = c(maxBiomassRatios[which(maxBiomassRatios$species == "ABIE.BAL"),
+                                                          "maxBiomassRatio"], seq(0.2, 1, 0.1)))
+spinupMortalityFraction <- c(0, 0.001, 0.005, 0.01, 0.018, 0.025, 0.05)
+
+
 #     
 #     mutate(maxB_sppMean = mean(maxB),
 #               maxBiomassRatio = maxB/maxB_landtype)
@@ -48,7 +54,10 @@ for (k in maxBiomassCoeff) {
     for (i in seq_along(correctionFactors)) {
         sp <- names(correctionFactors)[i]
         spIndex <- which(intermediateInputs$species == sp)
-        nPad <- max(nchar(propMaxBiomassBoost[[i]]))
+        nPad <- max(nchar(propMaxBiomassBoost[[i]][-1]))+1
+        if(nPad == -Inf) {
+            nPad <- 4
+        }
         
         for (j in seq_along(correctionFactors[[i]])) {
             
@@ -66,7 +75,7 @@ for (k in maxBiomassCoeff) {
             fileName <- paste0("biomass-succession-dynamic-inputs_",
                                "sppRatio",
                                ifelse(target == 1, "1.00",
-                                      str_pad(target, nPad, pad = "0", side = "right")),
+                                      str_pad(round(target,2), nPad, pad = "0", side = "right")),
                                "_maxBmult",
                                ifelse(k == 1, "1.00",
                                       str_pad(k, nPad, pad = "0", side = "right")),
@@ -111,11 +120,6 @@ for (k in maxBiomassCoeff) {
 }
 
 
-
-
-
-
-
 ########################
 ########################
 ### generating simulation packages
@@ -126,7 +130,8 @@ tmp <- str_split(gsub(".txt|sppRatio|maxBmult", "", files), "_")
 targetABIEBAL <- as.numeric(lapply(tmp, function(x) x[2]))
 maxBiomassCoeff <- as.numeric(lapply(tmp, function(x) x[3]))
 
-s <- 0
+
+s <- sStart <- 0
 for (f in seq_along(spinupMortalityFraction)) {
     smf <- spinupMortalityFraction[f]
     con <- file("../biomass-succession-main-inputs.txt")
@@ -142,7 +147,7 @@ for (f in seq_along(spinupMortalityFraction)) {
     
     for (i in seq_along(files)) {
         
-        corrFactor <- correctionFactors[[sp]][which(round(propMaxBiomassBoost[[sp]] - targetABIEBAL[i], 3) == 0)]
+        corrFactor <- correctionFactors[[sp]][which(round(propMaxBiomassBoost[[sp]] - targetABIEBAL[i], 2) == 0)]
         
     
         simName <- str_pad(s, nchar(nSims), pad = "0")
@@ -158,7 +163,7 @@ for (f in seq_along(spinupMortalityFraction)) {
                          spBiomassMultiplier = corrFactor,
                          maxBiomassMultiplier = maxBiomassCoeff[i],
                          spinupMortalityFraction = smf)
-        if(s == 0) {
+        if(s == sStart) {
             simInfo <- df
         } else {
             simInfo <- rbind(simInfo, df)
@@ -167,6 +172,7 @@ for (f in seq_along(spinupMortalityFraction)) {
     }
 }
 write.csv(simInfo, file = "../simInfo.csv", row.names = F)
+
 
 
 

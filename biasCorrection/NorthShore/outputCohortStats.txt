@@ -1,5 +1,0 @@
-LandisData "Output Cohort Statistics" 
-Timestep 5 
-SiteAgeStats 
-MapNames output/cohort-stats/AGE-{statistic}-{timestep}.tif 
-MAX 

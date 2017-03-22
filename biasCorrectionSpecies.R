@@ -1,10 +1,10 @@
 rm(list = ls())
-a <- "NorthShore"
+a <- "LSJ"
 initDir <- paste("..", a, sep = "/")
 ###
 outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
-                    "/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/NorthShoreCalib/",
-                    "/media/dcyr/Data/Sims/NorthShoreCalib")
+                    "/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/LSJCalib/",
+                    "/media/dcyr/Data/Sims/LSJCalib")
 ###
 setwd(paste("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/", a, sep = "/"))
 wwd <- paste(paste(getwd(), Sys.Date(), sep = "/"))
@@ -73,13 +73,13 @@ biomassKnnProp <- biomassKnn/biomassKnnTotal
 require(doSNOW)
 require(parallel)
 require(dplyr)
-clusterN <-  max(1, floor(0.9*detectCores()))  ### choose number of nodes to add to cluster.
+clusterN <-  max(1, floor(0.4*detectCores()))  ### choose number of nodes to add to cluster.
 
 ############################################################
 #######  subsetting simulations
 
 ## producing maps?
-mapProduce <- TRUE
+mapProduce <- F
 
 
 for (SMF in c(0.018)) {#c(0.01, 0.018, 0.025)) {#
@@ -87,13 +87,8 @@ for (SMF in c(0.018)) {#c(0.01, 0.018, 0.025)) {#
     smfString <- str_pad(SMF, 5, pad = "0", side = "right")
     
     # ### first pass - North Shore
-    maxBmult <- c(0.55, 0.7, 0.85, 1)
-    AbTargetRatio <- c(0.2, 0.4, 0.6, 0.8)
-    
-    # ### second pass - North Shore
-    # maxBmult <- c(0.7)
-    # AbTargetRatio <- c(0.5)
-    
+    maxBmult <- 1 #c(0.55, 0.7, 0.85, 1)
+    AbTargetRatio <- 0.18#c(0.2, 0.4, 0.6, 0.8)
     
     simInfoSubsample <- simInfo %>%
         filter(spinupMortalityFraction %in% SMF,
@@ -151,7 +146,7 @@ for (SMF in c(0.018)) {#c(0.01, 0.018, 0.025)) {#
 
         ### converting to long data.frame for ggplot2
         x <-  rasterToPoints(x)
-        colnames(x)[3:ncol(x)] <- c(spp, "total")
+        colnames(x)[3:ncol(x)] <- c(spp, "Total")
 
         x <- melt(as.data.frame(x),
                   id.vars = c("x", "y"),
@@ -180,68 +175,135 @@ for (SMF in c(0.018)) {#c(0.01, 0.018, 0.025)) {#
     #
     biomassCalibSummary <- do.call(rbind, extractElement(biomassCalib, element = "summary"))
     rownames(biomassCalibSummary) <- 1:nrow(biomassCalibSummary)
+    biomassCalibSummary <- merge(biomassCalibSummary, simInfo)
     save(biomassCalibSummary, file = paste0("biomassCalibSummary_", smfString, ".RData"))
     #
     biomassCalibMaps <- do.call(rbind, extractElement(biomassCalib[subSample], element = "map"))
     rownames(biomassCalibMaps) <- 1:nrow(biomassCalibMaps)
     save(biomassCalibMaps, file = paste0("biomassCalibMaps_", smfString, ".RData"))
-     
+
+    
     
     if(mapProduce) {
         ######################################################
         ######   compute df for total
-        for (sp in c("total")) {#, spp)) {
+        for (sp in c(spp, "Total")) {#, spp)) {
             
             df <- biomassCalibMaps %>%
                 filter(species == sp)
             
+            dfBias <- biomassCalibSummary %>%
+                filter(species == sp)
+            df <- merge(df, dfBias, by = c("averageMaxBiomassTarget","maxBiomassMultiplier"))
+            
+            ########################
+            #### Compute sp biases
+            
             colScale <- scale_fill_gradient2(name = "bias (tons/ha)",
                                              low = "#4477AA", mid = "white", high = "#BB4444", midpoint = 0)
             
+            yMax <- max(df$y)
+            xMax <- max(df$x)
+            ###########
+            nMaxBSp <- length(unique(df$maxBiomassMultiplier))
+            nMaxB <- length(unique(df$maxBiomassMultiplier))
             
-            p <- ggplot(data = df, aes(x = x, y = y, fill = biomassResidual_tonsPerHa)) +
+            p <- ggplot(data = df, aes(x = x, y = y, fill = biomassResidual_tonsPerHa,
+                                       label = paste(round(residualMean_tonsPerHa, 1), "tons/ha"))) +
                 theme_dark() +
                 geom_raster() +
                 coord_fixed() +
                 colScale +
                 facet_grid(averageMaxBiomassTarget ~ maxBiomassMultiplier) +
+                geom_text(aes(x = xMax, y = yMax,
+                              label = "mean bias"),
+                          hjust = 1, size = rel(3), fontface = 1) +
+                geom_text(aes(x = xMax, y = yMax - 17000),
+                          hjust = 1, size = rel(3), fontface = "bold") +#
                 theme(axis.text = element_blank(),
                       axis.title = element_blank(),
-                      axis.ticks = element_blank())
+                      axis.ticks = element_blank(),
+                      title = element_text(size = rel(0.5*(0.66*nMaxB))),
+                      strip.text = element_text(size = rel(0.5)),
+                      legend.key.size = unit(0.15 * (0.66*nMaxB), "in"),
+                      legend.text = element_text(size = rel(0.5 * (0.66*nMaxB)))) +
+                labs(title = paste0("Difference between initial biomass after LANDIS spinup and Knn estimations\n", sp))
             
-            yMax <- layer_scales(p)$y$range$range[2]
-            xMax <- layer_scales(p)$x$range$range[2]
+
             
-            nMaxBSp <- length(unique(df$maxBiomassMultiplier))
-            nMaxB <- length(unique(df$maxBiomassMultiplier))
-            
+            ##
             pHeight <- nMaxBSp * 2.5
             pWidth <- (nMaxB+1) * 2
-            
+            #
             png(filename = paste0("initBias_SMF",smfString, "_", sp, ".png"),
                 width = pWidth, height = pHeight, units = "in", res = 600, pointsize=10)
             
-            p <- p +
-                labs(title = paste0("Difference between initial biomass after LANDIS spinup and Knn estimations\n", sp)) +
-                geom_text(aes(x = xMax, y = yMax,
-                              label = "bias (global)"),
-                          hjust = 1, size = rel(2), fontface = 1) +
-                geom_text(aes(x = xMax, y = yMax - 20000,
-                              ###### calculer les biais résiduels en amont et créer un df...
-                              #############################################################
-                              label = round(mean(df$biomassResidual_tonsPerHa, na.rm = T),1)),
-                          hjust = 1, size = rel(2), fontface = "bold") +#
-                theme(title = element_text(size = rel(0.5*(0.66*nMaxB))),
-                      strip.text = element_text(size = rel(0.5)),
-                      legend.key.size = unit(0.15 * (0.66*nMaxB), "in"),
-                      legend.text = element_text(size = rel(0.5 * (0.66*nMaxB))))
-            
-            
             print(p)
+            
             dev.off()
         } 
     }
+    
+    #############################################################
+    ### One figure, all species
+    
+    if (nrow(simInfoSubsample) == 1) {
+        df <- biomassCalibMaps
+        
+        dfBias <- biomassCalibSummary
+        df <- merge(df, dfBias, by = "species")
+        
+        ########################
+        #### Compute sp biases
+        
+        colScale <- scale_fill_gradient2(name = "bias (tons/ha)",
+                                         low = "#4477AA", mid = "white", high = "#BB4444", midpoint = 0)
+        
+        yMax <- max(df$y)
+        xMax <- max(df$x)
+        ###########
+        
+        p <- ggplot(data = df, aes(x = x, y = y, fill = biomassResidual_tonsPerHa,
+                                   label = paste(round(residualMean_tonsPerHa, 1), "tons/ha"))) +
+            theme_dark() +
+            geom_raster() +
+            coord_fixed() +
+            colScale +
+            facet_wrap( ~ species) +
+            geom_text(aes(x = xMax, y = yMax,
+                          label = "mean bias"),
+                      hjust = 1, size = rel(2.5), fontface = 1) +
+            geom_text(aes(x = xMax, y = yMax - 25000),
+                      hjust = 1, size = rel(2.5), fontface = "bold") +#
+            theme(axis.text = element_blank(),
+                  axis.title = element_blank(),
+                  axis.ticks = element_blank(),
+                  title = element_text(size = rel(1)),
+                  strip.text = element_text(size = rel(0.75)),
+                  legend.key.size = unit(0.25, "in"),
+                  legend.text = element_text(size = rel(1))) +
+            labs(title = paste0("Difference between initial biomass after LANDIS spinup and Knn estimations"))
+        
+        
+        
+        ##
+        pHeight <- 10
+        pWidth <- 10
+        #
+        png(filename = paste0("initBias_SMF",smfString, ".png"),
+            width = pWidth, height = pHeight, units = "in", res = 600, pointsize=10)
+        
+        print(p)
+        
+        dev.off() 
+    }
+    
+    
+    
 }
+
+
+
 
 #############################################################
 #############################################################
@@ -250,3 +312,52 @@ for (SMF in c(0.018)) {#c(0.01, 0.018, 0.025)) {#
 #############################################################
 
 
+
+### second pass - North Shore
+maxBmult <- c(0.7)
+AbTargetRatio <- c(0.5)
+SMF <- 0.018
+###
+simInfoSubsample <- simInfo %>%
+    filter(spinupMortalityFraction == SMF,
+           maxBiomassMultiplier == maxBmult,
+           averageMaxBiomassTarget == AbTargetRatio)
+
+
+
+
+simN <- simInfoSubsample$simID
+
+x <- stack(paste0(outputDir, "/", simN, "/output/biomass/biomass_", c(spp, "TotalBiomass"), "_0.tif"))
+
+x[sum(x) == 0] <- NA
+crs(x) <- crs(biomassKnn)
+extent(x) <- extent(biomassKnn)
+## convert to tons per ha
+x <- x/100
+
+## computing differences between spinup and reference
+x <- x - stack(biomassKnn, biomassKnnTotal)
+
+## computing exact statistics
+rasterValues <- values(x)
+rasterValues[rasterValues==0] <- NA
+mat <- apply(rasterValues, 2, mean, na.rm = T)
+mat <- data.frame(biasMean_tonsPerHa = mat,
+                  redidualMean_proportion = mat/biomassKnnSppWhenPresent_mean)
+
+mat <- round(mat, 2)
+
+mat <- data.frame(simID = simN,
+                  species = gsub("biomass|Biomass|_|0", "", rownames(mat)),
+                  mat)
+rownames(mat) <- 1:nrow(mat)
+
+
+
+
+
+### copying bias corrected files to working directory
+
+file.copy(paste0(outputDir, simN, "/biomass-succession-dynamic-inputs.txt"),
+          paste0("biomass-succession-dynamic-inputs_", a, "_BiasCorrected.txt"), overwrite = T)

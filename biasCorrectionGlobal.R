@@ -6,7 +6,7 @@
 #################  
 #################  It takes about one minute for a thousand simulations
 rm(list = ls())
-a <- "NorthShore"
+a <- "LSJ"
 ###
 setwd(paste("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/", a, sep = "/"))
 wwd <- paste(paste(getwd(), Sys.Date(), sep = "/"))
@@ -78,7 +78,7 @@ dfSummary <- foreach(i = 1:nrow(simInfo), .combine = "rbind") %dopar% {
     require(stringr)
     simN <- str_pad(simInfo[i, "simDir"], 3, pad = "0")
     
-    x <- get(load(paste0("../processedOutputs/processedOutputs_", simN, ".RData")))
+    x <- get(load(paste0("../processedOutputs/processedOutputs_", simN, ".RData")))[["biomassTotal"]]
     
     x <- data.frame(biomassTotalMean_tonsPerHa =  mean(values(x$biomassTotal), na.rm = T),
                     brayDissRel_mean =  mean(values(x$brayDistRel), na.rm = T),

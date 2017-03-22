@@ -23,8 +23,8 @@ require(ggplot2)
 require(data.table)
 
 outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
-                    paste0("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/", a, "Calib/processedOutput"),
-                    paste0("/media/dcyr/Data/Sims/", a, "Calib/processedOutput"))
+                    paste0("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/", a, "Calib/processedOutputs"),
+                    paste0("/media/dcyr/Data/Sims/", a, "Calib/processedOutputs"))
 
 
 

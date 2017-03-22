@@ -6,7 +6,7 @@
 #################  
 #################  It takes about one minute for a thousand simulations
 rm(list = ls())
-a <- "LSJ"
+a <- "NorthShore"
 ###
 setwd(paste("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/", a, sep = "/"))
 wwd <- paste(paste(getwd(), Sys.Date(), sep = "/"))
@@ -21,6 +21,11 @@ require(vegan)
 require(reshape2)
 require(ggplot2)
 require(data.table)
+
+outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
+                    paste0("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/", a, "Calib/processedOutput"),
+                    paste0("/media/dcyr/Data/Sims/", a, "Calib/processedOutput"))
+
 
 
 ################################################################
@@ -44,7 +49,7 @@ names(biomassKnn) <- paste0(spp, "_tonsPerHa")
 # removing inactive pixels
 biomassKnn[is.na(landtypes)] <- NA
 ################################################################
-simInfo <- read.csv("../simInfo.csv")
+simInfo <- read.csv(paste(outputDir, "simInfo.csv", sep = "/"))
 simDir <- simInfo$simDir
 simDir <- str_pad(simDir, max(nchar(simDir)), pad = 0)
 ## total biomass (Knn estimates)
@@ -59,8 +64,8 @@ biomassKnnProp <- biomassKnn/biomassKnnTotal
 #################################################################################################
 #################################################################################################
 #################  calibration figures - First pass (total biomass and global composition)
-outputs <- list.files("../processedOutputs/")
-outputs <- outputs[grep("processedOutputs", outputs)]
+outputs <- list.files(outputDir)
+outputs <- outputs[grep("biomassTotal", outputs)]
 simNum <- gsub("[^0-9]", "", outputs)
 require(doSNOW)
 require(parallel)
@@ -78,11 +83,13 @@ dfSummary <- foreach(i = 1:nrow(simInfo), .combine = "rbind") %dopar% {
     require(stringr)
     simN <- str_pad(simInfo[i, "simDir"], 3, pad = "0")
     
-    x <- get(load(paste0("../processedOutputs/processedOutputs_", simN, ".RData")))[["biomassTotal"]]
+    biomassTotal <- raster(paste0("../processedOutputs/biomassTotal_", simN, ".tif"))
+    distAbs <- raster(paste0("../processedOutputs/distAbs_", simN, ".tif"))
+    distRel <- raster(paste0("../processedOutputs/distRel_", simN, ".tif"))
     
-    x <- data.frame(biomassTotalMean_tonsPerHa =  mean(values(x$biomassTotal), na.rm = T),
-                    brayDissRel_mean =  mean(values(x$brayDistRel), na.rm = T),
-                    brayDissAbs_mean =  mean(values(x$brayDistAbs), na.rm = T),
+    x <- data.frame(biomassTotalMean_tonsPerHa =  mean(values(biomassTotal), na.rm = T),
+                    brayDissAbs_mean =  mean(values(distAbs), na.rm = T),
+                    brayDissRel_mean =  mean(values(distRel), na.rm = T),
                                      simID = simN,
                                      simInfo[i, c("averageMaxBiomassTarget",
                                                   "spAnppMultiplier",

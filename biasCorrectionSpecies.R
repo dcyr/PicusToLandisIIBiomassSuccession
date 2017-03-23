@@ -324,7 +324,7 @@ if (nrow(simInfoSubsample) == 1) {
     
     # reference configuration
     simInfoRef <- simInfo %>%
-        filter(spinupMortalityFraction %in% SMF,
+        filter(spinupMortalityFraction %in% 0.018,
                maxBiomassMultiplier == 1, 
                spBiomassMultiplier == 1)
     simNnoCorr <- simInfoRef$simID
@@ -334,10 +334,10 @@ if (nrow(simInfoSubsample) == 1) {
     xNoCorr <- stack(paste0(outputDir, "/", simNnoCorr, "/output/biomass/biomass_", c(spp, "TotalBiomass"), "_0.tif"))
     x[sum(x) == 0] <- NA
     xNoCorr[sum(xNoCorr) == 0] <- NA
+
+    crs(x) <- crs(xNoCorr) <- crs(biomassKnn)
+    extent(x) <- extent(xNoCorr) <- extent(biomassKnn)
     
-    
-    
-   
     ### convert to tons per ha
     x <- x/100
     xNoCorr <- xNoCorr/100

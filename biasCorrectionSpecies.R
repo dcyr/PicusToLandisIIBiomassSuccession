@@ -78,9 +78,6 @@ clusterN <-  max(1, floor(0.4*detectCores()))  ### choose number of nodes to add
 ############################################################
 #######  subsetting simulations
 
-## producing maps?
-mapProduce <- T
-
 
 for (SMF in c(0.018)) {#c(0.01, 0.018, 0.025)) {#
     #SMF <- 0.018  
@@ -89,6 +86,9 @@ for (SMF in c(0.018)) {#c(0.01, 0.018, 0.025)) {#
     # ### first pass - North Shore
     maxBmult <- c(0.55, 0.7, 0.85, 1)
     AbTargetRatio <- c(0.2, 0.4, 0.6, 0.8)
+    # ### second pass - all species together on the same figure
+    maxBmult <- c(0.7)
+    AbTargetRatio <- c(0.5)
     
     simInfoSubsample <- simInfo %>%
         filter(spinupMortalityFraction %in% SMF,
@@ -184,7 +184,7 @@ for (SMF in c(0.018)) {#c(0.01, 0.018, 0.025)) {#
 
     
     
-    if(mapProduce) {
+    if(nrow(simInfoSubsample)>1) {  # then plot all species separately
         ######################################################
         ######   compute df for total
         for (sp in c(spp, "Total")) {#, spp)) {
@@ -310,51 +310,55 @@ for (SMF in c(0.018)) {#c(0.01, 0.018, 0.025)) {#
 
 
 
-### second pass - North Shore
-maxBmult <- c(0.7)
-AbTargetRatio <- c(0.5)
-SMF <- 0.018
-###
-simInfoSubsample <- simInfo %>%
-    filter(spinupMortalityFraction == SMF,
-           maxBiomassMultiplier == maxBmult,
-           averageMaxBiomassTarget == AbTargetRatio)
+if (nrow(simInfoSubsample) == 1) {
+    
+    # selected configuration
+    simN <- simInfoSubsample$simID
+    
+    # reference configuration
+    simInfoRef <- simInfo %>%
+        filter(spinupMortalityFraction %in% SMF,
+               maxBiomassMultiplier == 1, 
+               spBiomassMultiplier == 1)
+    simNnoCorr <- simInfoRef$simID
+    
+    x <- stack(paste0(outputDir, "/", simN, "/output/biomass/biomass_", c(spp, "TotalBiomass"), "_0.tif"))
+    xNoCorr <- stack(paste0(outputDir, "/", simNnoCorr, "/output/biomass/biomass_", c(spp, "TotalBiomass"), "_0.tif"))
+    x[sum(x) == 0] <- NA
+    xNoCorr[sum(xNoCorr) == 0] <- NA
+    
+    crs(x) <- crs(xNoCorr) <- crs(biomassKnn)
+    extent(x) <- extent(xNoCorr) <- extent(biomassKnn)
+    ## convert to tons per ha
+    x <- x/100
+    xNoCorr <- xNoCorr/100
+    
+    ## computing differences between spinup and reference
+    xRef <- stack(biomassKnn, biomassKnnTotal)
+    x <- x - xRef
+    xNoCorr <- xNoCorr - xRef
+    
+    ### computing exact statistics
+    rasterValues <- values(x)
+    rasterValues[rasterValues==0] <- NA
+    mat <- apply(rasterValues, 2, mean, na.rm = T)
+    #
+    rasterValues <- values(xNoCorr)
+    rasterValues[rasterValues==0] <- NA
+    mat2 <- apply(rasterValues, 2, mean, na.rm = T)
+    
+    mat <- data.frame(biasMean_tonsPerHa_Corr = mat,
+                      biasMean_tonsPerHa_noCorr = mat2,
+                      redidualMean_proportion_Corr = mat/biomassKnnSppWhenPresent_mean,
+                      redidualMean_proportion_noCorr = mat/biomassKnnSppWhenPresent_mean)
+    ####
+    write.csv(mat, file = "summaryTable.csv", row.names = F)
+    ####
+    ### copying bias corrected files to working directory
+    file.copy(paste0(outputDir, simN, "/biomass-succession-dynamic-inputs.txt"),
+              paste0("biomass-succession-dynamic-inputs_", a, "_BiasCorrected.txt"), overwrite = T)
+}
 
 
 
 
-simN <- simInfoSubsample$simID
-
-x <- stack(paste0(outputDir, "/", simN, "/output/biomass/biomass_", c(spp, "TotalBiomass"), "_0.tif"))
-
-x[sum(x) == 0] <- NA
-crs(x) <- crs(biomassKnn)
-extent(x) <- extent(biomassKnn)
-## convert to tons per ha
-x <- x/100
-
-## computing differences between spinup and reference
-x <- x - stack(biomassKnn, biomassKnnTotal)
-
-## computing exact statistics
-rasterValues <- values(x)
-rasterValues[rasterValues==0] <- NA
-mat <- apply(rasterValues, 2, mean, na.rm = T)
-mat <- data.frame(biasMean_tonsPerHa = mat,
-                  redidualMean_proportion = mat/biomassKnnSppWhenPresent_mean)
-
-mat <- round(mat, 2)
-
-mat <- data.frame(simID = simN,
-                  species = gsub("biomass|Biomass|_|0", "", rownames(mat)),
-                  mat)
-rownames(mat) <- 1:nrow(mat)
-
-
-
-
-
-### copying bias corrected files to working directory
-
-file.copy(paste0(outputDir, simN, "/biomass-succession-dynamic-inputs.txt"),
-          paste0("biomass-succession-dynamic-inputs_", a, "_BiasCorrected.txt"), overwrite = T)

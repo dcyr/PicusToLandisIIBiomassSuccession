@@ -83,9 +83,9 @@ for (SMF in c(0.018)) {#c(0.01, 0.018, 0.025)) {#
     #SMF <- 0.018  
     smfString <- str_pad(SMF, 5, pad = "0", side = "right")
     
-    # ### first pass - North Shore
-    maxBmult <- c(0.55, 0.7, 0.85, 1)
-    AbTargetRatio <- c(0.2, 0.4, 0.6, 0.8)
+    # # ### first pass - North Shore
+    # maxBmult <- c(0.55, 0.7, 0.85, 1)
+    # AbTargetRatio <- c(0.2, 0.4, 0.6, 0.8)
     # ### second pass - all species together on the same figure
     maxBmult <- c(0.7)
     AbTargetRatio <- c(0.5)
@@ -322,23 +322,36 @@ if (nrow(simInfoSubsample) == 1) {
                spBiomassMultiplier == 1)
     simNnoCorr <- simInfoRef$simID
     
+    # total biomass
     x <- stack(paste0(outputDir, "/", simN, "/output/biomass/biomass_", c(spp, "TotalBiomass"), "_0.tif"))
     xNoCorr <- stack(paste0(outputDir, "/", simNnoCorr, "/output/biomass/biomass_", c(spp, "TotalBiomass"), "_0.tif"))
     x[sum(x) == 0] <- NA
     xNoCorr[sum(xNoCorr) == 0] <- NA
+    ### diss index
+    #
+    distRel <- raster(paste0(outputDir, "/processedOutputs/distRel_", simN, ".tif"))
+    distRelnoCorr <- raster(paste0(outputDir, "/processedOutputs/distRel_", simNnoCorr, ".tif"))
+
+    crs(distRel) <- crs(distRelnoCorr) <- crs(biomassKnn)
+    extent(distRel) <- extent(distRelnoCorr) <- extent(biomassKnn)
+    # 
+    distAbs <- raster(paste0(outputDir, "/processedOutputs/distAbs_", simN, ".tif"))
+    distAbsnoCorr <- raster(paste0(outputDir, "/processedOutputs/distAbs_", simNnoCorr, ".tif"))
     
-    crs(x) <- crs(xNoCorr) <- crs(biomassKnn)
-    extent(x) <- extent(xNoCorr) <- extent(biomassKnn)
-    ## convert to tons per ha
+    crs(distAbs) <- crs(distAbsnoCorr) <- crs(biomassKnn)
+    extent(distAbs) <- extent(distAbsnoCorr) <- extent(biomassKnn)
+   
+    ### convert to tons per ha
     x <- x/100
     xNoCorr <- xNoCorr/100
     
-    ## computing differences between spinup and reference
+    ### computing differences between spinup and reference
     xRef <- stack(biomassKnn, biomassKnnTotal)
     x <- x - xRef
     xNoCorr <- xNoCorr - xRef
     
-    ### computing exact statistics
+    ### computing exact statistics 
+    # (biomass biases)
     rasterValues <- values(x)
     rasterValues[rasterValues==0] <- NA
     mat <- apply(rasterValues, 2, mean, na.rm = T)
@@ -352,7 +365,19 @@ if (nrow(simInfoSubsample) == 1) {
                       redidualMean_proportion_Corr = mat/biomassKnnSppWhenPresent_mean,
                       redidualMean_proportion_noCorr = mat/biomassKnnSppWhenPresent_mean)
     ####
-    write.csv(mat, file = "summaryTable.csv", row.names = F)
+    write.csv(mat, file = "summaryTable_biomass.csv", row.names = T)
+    
+    ## computing mean dissimilarities
+    rasterValues <- values(distAbs)
+    distAbs <- mean(rasterValues, na.rm = T)
+    rasterValues <- values(distRel)
+    distRel <- mean(rasterValues, na.rm = T)
+    
+    df <- data.frame(brayDissAbs = distAbs,
+                     brayDissRel = distRel)
+    
+    write.csv(df, file = "summaryTable_diss.csv", row.names = F)
+    
     ####
     ### copying bias corrected files to working directory
     file.copy(paste0(outputDir, simN, "/biomass-succession-dynamic-inputs.txt"),

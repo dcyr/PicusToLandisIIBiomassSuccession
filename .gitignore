@@ -6,4 +6,3 @@
 *.pdf
 processedOutputs/*.csv
 *~
-biasCorrection/*/processedOutputs/

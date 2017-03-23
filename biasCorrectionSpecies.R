@@ -332,14 +332,14 @@ if (nrow(simInfoSubsample) == 1) {
     distRel <- raster(paste0(outputDir, "/processedOutputs/distRel_", simN, ".tif"))
     distRelnoCorr <- raster(paste0(outputDir, "/processedOutputs/distRel_", simNnoCorr, ".tif"))
 
-    crs(distRel) <- crs(distRelnoCorr) <- crs(biomassKnn)
-    extent(distRel) <- extent(distRelnoCorr) <- extent(biomassKnn)
+    # crs(distRel) <- crs(distRelnoCorr) <- crs(biomassKnn)
+    # extent(distRel) <- extent(distRelnoCorr) <- extent(biomassKnn)
     # 
     distAbs <- raster(paste0(outputDir, "/processedOutputs/distAbs_", simN, ".tif"))
     distAbsnoCorr <- raster(paste0(outputDir, "/processedOutputs/distAbs_", simNnoCorr, ".tif"))
     
-    crs(distAbs) <- crs(distAbsnoCorr) <- crs(biomassKnn)
-    extent(distAbs) <- extent(distAbsnoCorr) <- extent(biomassKnn)
+    # crs(distAbs) <- crs(distAbsnoCorr) <- crs(biomassKnn)
+    # extent(distAbs) <- extent(distAbsnoCorr) <- extent(biomassKnn)
    
     ### convert to tons per ha
     x <- x/100

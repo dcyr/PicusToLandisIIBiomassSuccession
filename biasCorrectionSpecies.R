@@ -77,7 +77,7 @@ clusterN <-  max(1, floor(0.4*detectCores()))  ### choose number of nodes to add
 
 ############################################################
 #######  subsetting simulations
-dfSummary <- get(load("../processedOutputs/dfSummary.RData"))
+dfSummary <- get(load("../results/dfSummary.RData"))
 
 index <- unique(c(which.min(dfSummary$brayDissAbs_mean),
            which.min(dfSummary$brayDissRel_mean)))

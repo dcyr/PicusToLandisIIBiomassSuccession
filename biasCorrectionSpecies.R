@@ -1,5 +1,5 @@
 rm(list = ls())
-a <- "NorthShore"
+a <- "LSJ"
 initDir <- paste("..", a, sep = "/")
 ###
 outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
@@ -85,6 +85,8 @@ simIDcorr <- as.character(dfSummary[index,"simID"])
 
 simInfoSubsample <- simInfo %>%
     filter(simID %in% simIDcorr)
+
+print(simInfoSubsample)
 
 # # ### first pass - North Shore
 # maxBmult <- c(0.55, 0.7, 0.85, 1)

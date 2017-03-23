@@ -6,7 +6,7 @@
 #################  
 #################  It takes about one minute for a thousand simulations
 rm(list = ls())
-a <- "NorthShore"
+a <- "LSJ"
 ###
 setwd(paste("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/", a, sep = "/"))
 wwd <- paste(paste(getwd(), Sys.Date(), sep = "/"))

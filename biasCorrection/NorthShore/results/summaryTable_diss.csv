@@ -1,0 +1,3 @@
+"simID","distAbs","distRel","simDir","averageMaxBiomassTarget","spAnppMultiplier","spBiomassMultiplier","maxBiomassMultiplier","spinupMortalityFraction"
+"0310",0.342664355037957,0.258974372886877,310,0.6,2.76542448675385,2.76542448675385,0.55,0.01
+"1099",0.401198082713305,0.310606184575824,1099,0.22,1,1,1,0.018

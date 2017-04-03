@@ -125,7 +125,7 @@ for (i in unique(dfSummary$maxBiomassMultiplier)) {
     x <- df$spinupMortalityFraction
     y <- df$averageMaxBiomassTarget
     z <- df$brayDissAbs_mean
-    gridLines <- 80
+    gridLines <- 100
     ###
     fit <- loess(z ~ x + y, span = 0.15)
     ###
@@ -252,6 +252,9 @@ zRange <- range(dfSummary$biomassTotalMean_tonsPerHa - biomassKnnTotal_mean)
 
 fList <- character() 
 for (i in unique(dfSummary$spinupMortalityFraction)) {
+    if (i == 0.05) {
+        next
+    }
     SMF <- i
     
     df <- dfSummary %>%
@@ -271,7 +274,7 @@ for (i in unique(dfSummary$spinupMortalityFraction)) {
     # 
     # cols <- colAll[findInterval(z, breaks)]
     ###
-    fit <- loess(z ~ x + y, span = 0.25)
+    fit <- loess(z ~ x + y, span = 0.15)
     ############################################################
     xPred <- seq(min(x), max(x), length.out = gridLines)
     yPred <- seq(min(y), max(y), length.out = gridLines)

@@ -1,11 +1,11 @@
 rm(list = ls())
 
-areas <- "NorthShore"
+areas <- "LSJ"
 a <- areas[1]
 
 ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
-       setwd("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/NorthShoreCalib"),
-       setwd("/media/dcyr/Data/Sims/NorthShoreCalib"))
+       setwd(paste0("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/", a, "Calib")),
+       setwd(paste0("/media/dcyr/Data/Sims/", a, "Calib")))
 
 
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
@@ -16,7 +16,7 @@ rm(wwd)
 ##################
 require(doSNOW)
 require(parallel)
-clusterN <-  max(1, floor(0.8*detectCores()))  ## 5 for LSJ, 10 for NorthShore...
+clusterN <-  max(1, floor(0.4*detectCores()))  ## 5 for LSJ, 10 for NorthShore...
 print(paste(clusterN, "cores"))
 ##################
 
@@ -87,7 +87,7 @@ registerDoSNOW(cl)
 tInit <- Sys.time()
 nSims <- length(simDir)
 file.copy("../simInfo.csv", to = getwd(), overwrite = T)
-brayDist <- foreach(i = seq_along(simDir))  %dopar% { #) %dopar% { #
+brayDist <- foreach(i = 771:length(simDir))  %dopar% { #) %dopar% { ##seq_along(simDir))  %dopar% { #) %dopar% { #
     require(raster)
     require(vegan)
     # target <- simInfo[i, "averageMaxBiomassTarget"]
@@ -103,8 +103,6 @@ brayDist <- foreach(i = seq_along(simDir))  %dopar% { #) %dopar% { #
 
     ### convert to tons per ha
     x <- x / 100
-    
-    
     
     ### total biomass
     biomassTotal <- sum(x)

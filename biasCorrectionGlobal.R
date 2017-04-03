@@ -13,6 +13,7 @@ wwd <- paste(paste(getwd(), Sys.Date(), sep = "/"))
 dir.create(wwd)
 setwd(wwd)
 rm(wwd)
+print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 ###
 require(raster)
 require(RCurl)

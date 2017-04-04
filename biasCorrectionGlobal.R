@@ -13,7 +13,11 @@ wwd <- paste(paste(getwd(), Sys.Date(), sep = "/"))
 dir.create(wwd)
 setwd(wwd)
 rm(wwd)
-print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+require(doSNOW)
+require(parallel)
+clusterN <-  max(1, floor(0.9*detectCores()))  ### choose number of nodes to add to cluster.
+
 ###
 require(raster)
 require(RCurl)
@@ -22,12 +26,7 @@ require(vegan)
 require(reshape2)
 require(ggplot2)
 require(data.table)
-
-outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
-                    paste0("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/", a, "Calib/processedOutputs"),
-                    paste0("/media/dcyr/Data/Sims/", a, "Calib/processedOutputs"))
-
-
+require(dplyr)
 
 ################################################################
 ################################################################
@@ -50,7 +49,7 @@ names(biomassKnn) <- paste0(spp, "_tonsPerHa")
 # removing inactive pixels
 biomassKnn[is.na(landtypes)] <- NA
 ################################################################
-simInfo <- read.csv(paste(outputDir, "simInfo.csv", sep = "/"))
+simInfo <- read.csv("../simInfo.csv")
 simDir <- simInfo$simDir
 simDir <- str_pad(simDir, max(nchar(simDir)), pad = 0)
 ## total biomass (Knn estimates)
@@ -62,149 +61,112 @@ biomassKnnProp <- biomassKnn/biomassKnnTotal
 
 
 
-#################################################################################################
-#################################################################################################
-#################  calibration figures - First pass (total biomass and global composition)
-outputs <- list.files(outputDir)
-outputs <- outputs[grep("biomassTotal", outputs)]
-simNum <- gsub("[^0-9]", "", outputs)
-require(doSNOW)
-require(parallel)
-clusterN <-  max(1, floor(0.9*detectCores()))  ### choose number of nodes to add to cluster.
+# #################################################################################################
+# #################################################################################################
+# #################  calibration figures - First pass (total biomass and global composition)
+# outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
+#                     paste0("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/", a, "Calib/processedOutputs"),
+#                     paste0("/media/dcyr/Data/Sims/", a, "Calib/processedOutputs"))
+# ##
+# outputs <- list.files(outputDir)
+# outputs <- outputs[grep("biomassTotal", outputs)]
+# simNum <- gsub("[^0-9]", "", outputs)
+# 
+# ############################################################
+# ####### compiling results
+# cl = makeCluster(clusterN, outfile = "") ##
+# registerDoSNOW(cl)
+# ##
+# dfSummary <- foreach(i = 1:nrow(simInfo), .combine = "rbind") %dopar% {
+#     require(raster)
+#     require(stringr)
+#     simN <- str_pad(simInfo[i, "simDir"], max(nchar(simNum)), pad = "0")
+#     
+#     biomassTotal <- raster(paste0(outputDir, "/biomassTotal_", simN, ".tif"))
+#     distAbs <- raster(paste0(outputDir, "/distAbs_", simN, ".tif"))
+#     distRel <- raster(paste0(outputDir, "/distRel_", simN, ".tif"))
+#     
+#     x <- data.frame(biomassTotalMean_tonsPerHa =  mean(values(biomassTotal), na.rm = T),
+#                     brayDissAbs_mean =  mean(values(distAbs), na.rm = T),
+#                     brayDissRel_mean =  mean(values(distRel), na.rm = T),
+#                     simID = simN,
+#                     simInfo[i, c("averageMaxBiomassTarget",
+#                                  "spAnppMultiplier",
+#                                  "spBiomassMultiplier",
+#                                  "maxBiomassMultiplier",
+#                                  "spinupMortalityFraction")]
+#     )
+#     
+#     print(i)
+#     return(x)
+# } 
+# stopCluster(cl)
+# save(dfSummary, file = "dfSummary.RData")
 
 
 
-############################################################
-####### compiling results
-cl = makeCluster(clusterN, outfile = "") ##
-registerDoSNOW(cl)
-##
-dfSummary <- foreach(i = 1:nrow(simInfo), .combine = "rbind") %dopar% {
-    require(raster)
-    require(stringr)
-    simN <- str_pad(simInfo[i, "simDir"], max(nchar(simNum)), pad = "0")
-    
-    biomassTotal <- raster(paste0(outputDir, "/biomassTotal_", simN, ".tif"))
-    distAbs <- raster(paste0(outputDir, "/distAbs_", simN, ".tif"))
-    distRel <- raster(paste0(outputDir, "/distRel_", simN, ".tif"))
-    
-    x <- data.frame(biomassTotalMean_tonsPerHa =  mean(values(biomassTotal), na.rm = T),
-                    brayDissAbs_mean =  mean(values(distAbs), na.rm = T),
-                    brayDissRel_mean =  mean(values(distRel), na.rm = T),
-                                     simID = simN,
-                                     simInfo[i, c("averageMaxBiomassTarget",
-                                                  "spAnppMultiplier",
-                                                  "spBiomassMultiplier",
-                                                  "maxBiomassMultiplier",
-                                                  "spinupMortalityFraction")]
-    )
-    
-    print(i)
-    return(x)
-} 
-stopCluster(cl)
-save(dfSummary, file = "dfSummary.RData")
 
 
 ############################################################
 ####### Plots
+dfSummary <- get(load("../results/dfSummary.RData"))
+dfSummary <- filter(dfSummary,spinupMortalityFraction<=0.025 )
+#######
+require(plot3D)
 width <- 4
 height <- 3.75
 labelRel = .6
 titleRel = .75
 
-require(dplyr)
-require(plot3D)
-fListAbs <- fListRel <-  character() 
-for (i in unique(dfSummary$maxBiomassMultiplier)) {
-    maxBmult <- i
+#### grid lines for surface inter/extrapolation (careful with extrapolation because this is loess!!)
+gridLines <- 100
+
+xPred <- seq(min(dfSummary$spinupMortalityFraction),
+             max(dfSummary$spinupMortalityFraction), length.out = gridLines)
+yPred <- seq(min(dfSummary$averageMaxBiomassTarget),
+             max(dfSummary$averageMaxBiomassTarget), length.out = gridLines)
+xy <- expand.grid( x = xPred, y = yPred)
+
+maxBmult <- unique(dfSummary$maxBiomassMultiplier)
+maxBmult <- maxBmult[order(maxBmult)]
+
+############################################################
+####### Bray dissimilarities - Absolute Abundances
+#######
+zlim <- c(floor(min(dfSummary$brayDissAbs_mean)*10)/10-0.05,
+             ceiling(max(dfSummary$brayDissAbs_mean)*10)/10 + 0.05)
+
+fListAbs <- character() 
+for (i in maxBmult) {
     df <- dfSummary %>%
-        filter(abs(dfSummary$maxBiomassMultiplier - maxBmult) < 0.0001)
+        filter(abs(dfSummary$maxBiomassMultiplier - i) < 0.0001)
     
-    ############################################################
-    ####### Bray dissimilarities - Absolute Abundances
     x <- df$spinupMortalityFraction
     y <- df$averageMaxBiomassTarget
     z <- df$brayDissAbs_mean
-    gridLines <- 100
+    
     ###
-    fit <- loess(z ~ x + y, span = 0.15)
+    fit <- loess(z ~ x + y, span = 0.35, control=loess.control(surface="direct"))
     ###
-    xPred <- seq(min(x), max(x), length.out = gridLines)
-    yPred <- seq(min(y), max(y), length.out = gridLines)
-    xy <- expand.grid( x = xPred, y = yPred)
+   
     zPred <- matrix(predict(fit, newdata = xy), 
-                  nrow = gridLines, ncol = gridLines)
+                    nrow = gridLines, ncol = gridLines)
     # fitted points for droplines to surface
     fitpoints <- predict(fit)
     
     fTitleAbs <- paste0("calibrationCompositionAbs_maxBmult",
-                        ifelse(maxBmult == 1, "1.00", str_pad(maxBmult, "4", pad = "0", side = "right")),
+                        ifelse(i == 1, "1.00", str_pad(i, "4", pad = "0", side = "right")),
                         ".png")
     
     fListAbs <- append(fListAbs, fTitleAbs)
     ############################################################
     png(filename = fTitleAbs,
-            width = width, height = height, units = "in", res = 300, pointsize = 8)
+        width = width, height = height, units = "in", res = 300, pointsize = 8)
     # scatter plot with regression plane
     scatter3D(x, y, z,
-              zlim = c(floor(min(zPred)*10)/10,
-                       ceiling(max(zPred)*10)/10),
-              #col = jet2.col(200),
-              pch = 20, cex = 0.35,
-              cex.lab = labelRel,
-              cex.axis = labelRel,
-              theta = 230, phi = 25,
-              ticktype = "detailed",
-              xlab = "\nspinup mortality fraction",
-              ylab = "\nABIE.BAL maxB target ratio",
-              zlab = "\nAverage dissimilarity",  
-              surf = list(x = xPred, y = yPred, z = zPred,
-                          facets = NA, fit = fitpoints,
-                          lwd = 0.15),
-              colkey = list(#dist = 0.025,
-                            cex.clab = labelRel,
-                            cex.axis = labelRel),
-              clab = c("Average", "dissimilarity"),
-              clim = c(floor(min(zPred)*10)/10,
-                       ceiling(max(zPred)*10)/10),
-              main = c("Landis-II Biomass Succession - Composition calibration",
-                       paste0("(Absolute abundances; max biomass multiplier = ", maxBmult, ")")),
-                      
-              cex.main = titleRel)
-    
-    dev.off()
-    
-    
-    ############################################################
-    ### Bray dissimilarities - relative abundances
-    x <- df$spinupMortalityFraction
-    y <- df$averageMaxBiomassTarget
-    z <- df$brayDissRel_mean
-    ###
-    fit <- loess(z ~ x + y, span = 0.15)
-    ###
-    xPred <- seq(min(x), max(x), length.out = gridLines)
-    yPred <- seq(min(y), max(y), length.out = gridLines)
-    xy <- expand.grid( x = xPred, y = yPred)
-    zPred <- matrix(predict(fit, newdata = xy), 
-                    nrow = gridLines, ncol = gridLines)
-    # fitted points for droplines to surface
-    fitpoints <- predict(fit)
-   
-    
-    fTitleRel <- paste0("calibrationCompositionRel_maxBmult",
-                     ifelse(maxBmult == 1, "1.00", str_pad(maxBmult, "4", pad = "0", side = "right")),
-                     ".png")
-    
-    fListRel <- append(fListRel, fTitleRel)
-    ############################################################
-    png(filename = fTitleRel,
-        width = width, height = height, units = "in", res = 300, pointsize = 8)
-    ### scatter plot with regression plane
-    scatter3D(x, y, z,
-              zlim = c(floor(min(zPred)*10)/10,
-                       ceiling(max(zPred)*10)/10),
+              zlim = zlim,
+              xlim = range(xPred),
+              ylim = range(yPred),
               #col = jet2.col(200),
               pch = 20, cex = 0.35,
               cex.lab = labelRel,
@@ -221,22 +183,88 @@ for (i in unique(dfSummary$maxBiomassMultiplier)) {
                   cex.clab = labelRel,
                   cex.axis = labelRel),
               clab = c("Average", "dissimilarity"),
-              clim = c(floor(min(zPred)*10)/10,
-                       ceiling(max(zPred)*10)/10),
+              clim = zlim,
+              # clim = c(floor(min(zPred)*10)/10,
+              #          ceiling(max(zPred)*10)/10),
               main = c("Landis-II Biomass Succession - Composition calibration",
-                       paste0("(Relative abundances; max biomass multiplier = ", maxBmult, ")")),
+                       paste0("(Absolute abundances; max biomass multiplier = ", i, ")")),
+              
               cex.main = titleRel)
     
     dev.off()
-
 }
 
-
 require(animation)
-oopt = ani.options(ani.dev="png", ani.type="png", interval = 0.5, autobrowse = FALSE)
+oopt = ani.options(ani.dev="png", ani.type="png", interval = 0.75, autobrowse = FALSE)
 ### (Windows users may want to add):  ani.options(convert = 'c:/program files/imagemagick/convert.exe')
 im.convert(fListAbs, output = "calibrationCompositionAbs.gif",
            extra.opts = "", clean = F)
+
+ 
+############################################################
+### Bray dissimilarities - relative abundances
+#######
+zlim <- c(floor(min(dfSummary$brayDissRel_mean)*10)/10-0.05,
+          ceiling(max(dfSummary$brayDissRel_mean)*10)/10 + 0.05)
+
+
+
+maxBmult <- unique(dfSummary$maxBiomassMultiplier)
+maxBmult <- maxBmult[order(maxBmult)]
+fListRel <-  character() 
+for (i in maxBmult) { 
+    df <- dfSummary %>%
+        filter(abs(dfSummary$maxBiomassMultiplier - i) < 0.0001)
+    
+    x <- df$spinupMortalityFraction
+    y <- df$averageMaxBiomassTarget
+    z <- df$brayDissRel_mean
+    ###
+    fit <- loess(z ~ x + y, span =  0.35, control=loess.control(surface="direct"))
+    #  
+    zPred <- matrix(predict(fit, newdata = xy), 
+                    nrow = gridLines, ncol = gridLines)
+    # fitted points for droplines to surface
+    fitpoints <- predict(fit)
+    
+    
+    fTitleRel <- paste0("calibrationCompositionRel_maxBmult",
+                        ifelse(i == 1, "1.00", str_pad(i, "4", pad = "0", side = "right")),
+                        ".png")
+    
+    fListRel <- append(fListRel, fTitleRel)
+    ############################################################
+    png(filename = fTitleRel,
+        width = width, height = height, units = "in", res = 300, pointsize = 8)
+    ### scatter plot with regression plane
+    scatter3D(x, y, z,
+              zlim = zlim,
+              xlim = range(xPred),
+              ylim = range(yPred),
+              #col = jet2.col(200),
+              pch = 20, cex = 0.35,
+              cex.lab = labelRel,
+              cex.axis = labelRel,
+              theta = 230, phi = 25,
+              ticktype = "detailed",
+              xlab = "\nspinup mortality fraction",
+              ylab = "\nABIE.BAL maxB target ratio",
+              zlab = "\nAverage dissimilarity",  
+              surf = list(x = xPred, y = yPred, z = zPred,
+                          facets = NA, fit = fitpoints,
+                          lwd = 0.15),
+              colkey = list(#dist = 0.025,
+                  cex.clab = labelRel,
+                  cex.axis = labelRel),
+              clab = c("Average", "dissimilarity"),
+              clim = zlim,
+              main = c("Landis-II Biomass Succession - Composition calibration",
+                       paste0("(Relative abundances; max biomass multiplier = ", i, ")")),
+              cex.main = titleRel)
+    
+    dev.off()
+    
+}
 
 require(animation)
 oopt = ani.options(ani.dev="png", ani.type="png", interval = 0.5, autobrowse = FALSE)
@@ -249,17 +277,20 @@ im.convert(fListRel, output = "calibrationCompositionRel.gif",
 
 ############################################################
 ### Total biomass
-zRange <- range(dfSummary$biomassTotalMean_tonsPerHa - biomassKnnTotal_mean)
+zlim <- range(dfSummary$biomassTotalMean_tonsPerHa - biomassKnnTotal_mean)
+
+xPred <- seq(min(dfSummary$averageMaxBiomassTarget),
+             max(dfSummary$averageMaxBiomassTarget), length.out = gridLines)
+yPred <- seq(min(dfSummary$maxBiomassMultiplier),
+             max(dfSummary$maxBiomassMultiplier), length.out = gridLines)
+xy <- expand.grid( x = xPred, y = yPred)
+
 
 fList <- character() 
 for (i in unique(dfSummary$spinupMortalityFraction)) {
-    if (i == 0.05) {
-        next
-    }
-    SMF <- i
-    
+
     df <- dfSummary %>%
-        filter(abs(spinupMortalityFraction - SMF) <= 0.0001)
+        filter(abs(spinupMortalityFraction - i) <= 0.0001)
     
     x <- df$averageMaxBiomassTarget
     y <- df$maxBiomassMultiplier
@@ -275,18 +306,15 @@ for (i in unique(dfSummary$spinupMortalityFraction)) {
     # 
     # cols <- colAll[findInterval(z, breaks)]
     ###
-    fit <- loess(z ~ x + y, span = 0.15)
+    fit <- loess(z ~ x + y, span = 0.15, control=loess.control(surface="direct"))
     ############################################################
-    xPred <- seq(min(x), max(x), length.out = gridLines)
-    yPred <- seq(min(y), max(y), length.out = gridLines)
-    xy <- expand.grid( x = xPred, y = yPred)
     zPred <- matrix(predict(fit, newdata = xy), 
                     nrow = gridLines, ncol = gridLines)
     # fitted points for droplines to surface
     fitpoints <- predict(fit)
     ############################################################
     fTitle <- paste0("calibrationTotalBiomass_SMF",
-                     ifelse(SMF ==  0, "0.000", str_pad(SMF, "5", pad = "0", side = "right")),
+                     ifelse(i ==  0, "0.000", str_pad(i, "5", pad = "0", side = "right")),
                      ".png")
     
     fList <- append(fList, fTitle)
@@ -295,7 +323,9 @@ for (i in unique(dfSummary$spinupMortalityFraction)) {
         width = width, height = height, units = "in", res = 300, pointsize = 8)
     # scatter plot with regression plane
     scatter3D(x, y, z,
-              zlim = zRange,
+              zlim = zlim,
+              xlim = range(xPred),
+              ylim = range(yPred),
               # zlim = c(floor(min(zPred)*10)/10,
               #          ceiling(max(zPred)*10)/10),
               # col = ramp.col(col = c("#BB4444", "#EE9988", "#808080", "#77AADD", "#4477AA"),
@@ -315,23 +345,18 @@ for (i in unique(dfSummary$spinupMortalityFraction)) {
               colkey = list(cex.clab = labelRel,
                             cex.axis = labelRel),
               clab = c("Residual", "average biomass", "(tons/ha)"),
-              clim = c(floor(min(zPred)*10)/10,
-                       ceiling(max(zPred)*10)/10),
+              clim = zlim,
               main = c("Landis-II Biomass Succession",
                        "Average total biomass calibration",
-                       paste("spinup mortality fraction:",SMF)),
+                       paste("spinup mortality fraction:",i)),
               cex.main = titleRel)
     
     dev.off()  
 }
-
-
 
 require(animation)
 oopt = ani.options(ani.dev="png", ani.type="png", interval = 0.66, autobrowse = FALSE)
 ### (Windows users may want to add):  ani.options(convert = 'c:/program files/imagemagick/convert.exe')
 im.convert(c(fList[-(length(fList))], rep(fList[length(fList)], 5)), output = "calibrationTotalBiomass.gif",
            extra.opts = "", clean = F)
-
-
 

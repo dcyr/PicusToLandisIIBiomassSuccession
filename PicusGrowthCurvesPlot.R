@@ -84,7 +84,7 @@ for (a in seq_along(areas)) {
     colScenarios <- c("black", "dodgerblue2", "goldenrod1", "red3")
     ## plotting
     p <- ggplot(df, aes(x = Year-2000, y = AGB_tonsPerHa, group = simID, col = scenario)) +
-        theme_set(theme_gray(base_size = 10)) +
+        theme_dark(base_size = 10) +
         geom_line(lwd = 0.1, alpha=0.5) +
         scale_colour_manual(values = colScenarios) +
         facet_grid(species ~ period) +

@@ -1,5 +1,5 @@
 rm(list = ls())
-a <- "LSJ"
+a <- "NorthShore"
 initDir <- paste("..", a, sep = "/")
 ###
 outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",

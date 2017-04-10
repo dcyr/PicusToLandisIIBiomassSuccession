@@ -6,7 +6,7 @@
 #################  
 #################  It takes about one minute for a thousand simulations
 rm(list = ls())
-a <- "LSJ"
+a <- "QcNb"
 ###
 setwd(paste("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/", a, sep = "/"))
 wwd <- paste(paste(getwd(), Sys.Date(), sep = "/"))
@@ -61,47 +61,47 @@ biomassKnnProp <- biomassKnn/biomassKnnTotal
 
 
 
-# #################################################################################################
-# #################################################################################################
-# #################  calibration figures - First pass (total biomass and global composition)
-# outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
-#                     paste0("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/", a, "Calib/processedOutputs"),
-#                     paste0("/media/dcyr/Data/Sims/", a, "Calib/processedOutputs"))
-# ##
-# outputs <- list.files(outputDir)
-# outputs <- outputs[grep("biomassTotal", outputs)]
-# simNum <- gsub("[^0-9]", "", outputs)
-# 
-# ############################################################
-# ####### compiling results
-# cl = makeCluster(clusterN, outfile = "") ##
-# registerDoSNOW(cl)
-# ##
-# dfSummary <- foreach(i = 1:nrow(simInfo), .combine = "rbind") %dopar% {
-#     require(raster)
-#     require(stringr)
-#     simN <- str_pad(simInfo[i, "simDir"], max(nchar(simNum)), pad = "0")
-#     
-#     biomassTotal <- raster(paste0(outputDir, "/biomassTotal_", simN, ".tif"))
-#     distAbs <- raster(paste0(outputDir, "/distAbs_", simN, ".tif"))
-#     distRel <- raster(paste0(outputDir, "/distRel_", simN, ".tif"))
-#     
-#     x <- data.frame(biomassTotalMean_tonsPerHa =  mean(values(biomassTotal), na.rm = T),
-#                     brayDissAbs_mean =  mean(values(distAbs), na.rm = T),
-#                     brayDissRel_mean =  mean(values(distRel), na.rm = T),
-#                     simID = simN,
-#                     simInfo[i, c("averageMaxBiomassTarget",
-#                                  "spAnppMultiplier",
-#                                  "spBiomassMultiplier",
-#                                  "maxBiomassMultiplier",
-#                                  "spinupMortalityFraction")]
-#     )
-#     
-#     print(i)
-#     return(x)
-# } 
-# stopCluster(cl)
-# save(dfSummary, file = "dfSummary.RData")
+#################################################################################################
+#################################################################################################
+#################  calibration figures - First pass (total biomass and global composition)
+outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
+                    paste0("/media/dcyr/Seagate Backup Plus Drive/Sync/Sims/", a, "Calib/processedOutputs"),
+                    paste0("/media/dcyr/Data/Sims/", a, "Calib/processedOutputs"))
+##
+outputs <- list.files(outputDir)
+outputs <- outputs[grep("biomassTotal", outputs)]
+simNum <- gsub("[^0-9]", "", outputs)
+
+############################################################
+####### compiling results
+cl = makeCluster(clusterN, outfile = "") ##
+registerDoSNOW(cl)
+##
+dfSummary <- foreach(i = 1:nrow(simInfo), .combine = "rbind") %dopar% {
+    require(raster)
+    require(stringr)
+    simN <- str_pad(simInfo[i, "simDir"], max(nchar(simNum)), pad = "0")
+
+    biomassTotal <- raster(paste0(outputDir, "/biomassTotal_", simN, ".tif"))
+    distAbs <- raster(paste0(outputDir, "/distAbs_", simN, ".tif"))
+    distRel <- raster(paste0(outputDir, "/distRel_", simN, ".tif"))
+
+    x <- data.frame(biomassTotalMean_tonsPerHa =  mean(values(biomassTotal), na.rm = T),
+                    brayDissAbs_mean =  mean(values(distAbs), na.rm = T),
+                    brayDissRel_mean =  mean(values(distRel), na.rm = T),
+                    simID = simN,
+                    simInfo[i, c("averageMaxBiomassTarget",
+                                 "spAnppMultiplier",
+                                 "spBiomassMultiplier",
+                                 "maxBiomassMultiplier",
+                                 "spinupMortalityFraction")]
+    )
+
+    print(i)
+    return(x)
+}
+stopCluster(cl)
+save(dfSummary, file = "dfSummary.RData")
 
 
 

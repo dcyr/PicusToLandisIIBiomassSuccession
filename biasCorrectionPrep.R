@@ -1,5 +1,7 @@
 rm(list = ls())
-setwd("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/LSJ")
+
+a <- "QcNb"
+setwd(paste("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection", a, sep = "/"))
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
 setwd(wwd)
@@ -24,10 +26,10 @@ maxBiomassRatios <- as.data.frame(maxBiomassRatios)
 
 ### these are targetted proportion of maxBiomass for given spp
 
-maxBiomassCoeff <- 0.40#seq(0.5, 1, by = 0.05)
+maxBiomassCoeff <- seq(0.4, 1, by = 0.1)
 propMaxBiomassBoost <- list(ABIE.BAL = c(maxBiomassRatios[which(maxBiomassRatios$species == "ABIE.BAL"),
                                                           "maxBiomassRatio"], seq(0.2, 1, 0.1)))
-spinupMortalityFraction <- c(0, 0.001, 0.005, 0.01, 0.018, 0.025, 0.05)
+spinupMortalityFraction <- c(0, 0.001, 0.005, 0.01, 0.018, 0.025)
 
 
 #     
@@ -131,7 +133,7 @@ targetABIEBAL <- as.numeric(lapply(tmp, function(x) x[2]))
 maxBiomassCoeff <- as.numeric(lapply(tmp, function(x) x[3]))
 
 
-s <- sStart <- 770
+s <- sStart <- 0
 for (f in seq_along(spinupMortalityFraction)) {
     smf <- spinupMortalityFraction[f]
     con <- file("../biomass-succession-main-inputs.txt")

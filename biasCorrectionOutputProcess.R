@@ -1,6 +1,6 @@
 rm(list = ls())
 
-areas <- "LSJ"
+areas <- "QcNb"
 a <- areas[1]
 
 ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
@@ -16,7 +16,7 @@ rm(wwd)
 ##################
 require(doSNOW)
 require(parallel)
-clusterN <-  max(1, floor(0.4*detectCores()))  ## 5 for LSJ, 10 for NorthShore...
+clusterN <-  max(1, floor(0.5*detectCores()))  ## 5 for LSJ, 10 for NorthShore...
 print(paste(clusterN, "cores"))
 ##################
 
@@ -87,7 +87,7 @@ registerDoSNOW(cl)
 tInit <- Sys.time()
 nSims <- length(simDir)
 file.copy("../simInfo.csv", to = getwd(), overwrite = T)
-brayDist <- foreach(i = 771:length(simDir))  %dopar% { #) %dopar% { ##seq_along(simDir))  %dopar% { #) %dopar% { #
+brayDist <- foreach(i = seq_along(simDir))  %dopar% { #) %dopar% { ##  %dopar% { #) %dopar% { #
     require(raster)
     require(vegan)
     # target <- simInfo[i, "averageMaxBiomassTarget"]

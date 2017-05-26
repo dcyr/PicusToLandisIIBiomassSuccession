@@ -1,5 +1,5 @@
 rm(list = ls())
-a <- "QcNb"
+a <- "SudStl"
 initDir <- paste("..", a, sep = "/")
 ###
 outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
@@ -79,11 +79,11 @@ clusterN <-  max(1, floor(0.4*detectCores()))  ### choose number of nodes to add
 #######  subsetting simulations
 dfSummary <- get(load("../results/dfSummary.RData"))
 
-dfSummarySbSample <- filter(dfSummary, spinupMortalityFraction == 0.018)
+dfSummarySbSample <-dfSummary #filter(dfSummary, spinupMortalityFraction == 0.018)
 ### for QcNb, try imposing SMF == 0.018
 index <- unique(c(which.min(dfSummarySbSample$brayDissAbs_mean),
                   which.min(dfSummarySbSample$brayDissRel_mean)))
-simIDcorr <- as.character(dfSummarySbSample[index,"simID"])
+simIDcorr <- as.character(dfSummarySbSample[index,"simID"])[1]
 
 # index <- unique(c(which.min(dfSummary$brayDissAbs_mean),
 #                   which.min(dfSummary$brayDissRel_mean)))
@@ -97,7 +97,7 @@ simInfoSubsample <- simInfo %>%
 
 
 simInfoSubsample <- rbind(simInfoSubsample, simInfo %>%
-                              filter(spinupMortalityFraction %in% 0.018,
+                              filter(spinupMortalityFraction %in% 0.001,
                                      maxBiomassMultiplier == 1, 
                                      spBiomassMultiplier == 1))
 

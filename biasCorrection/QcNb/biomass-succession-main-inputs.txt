@@ -38,6 +38,7 @@ ACER.SAH 1 0.08 15 1 0.1
 BETU.ALL 1 0.07 15 1 0.1
 BETU.PAP 1 0.07 25 0 0.1
 FAGU.GRA 1 0.08 15 1 0.1
+FRAX.AME 1 0.08 25 0 0.1
 LARI.LAR 1 0.02 25 0 0.2
 PICE.GLA 3 0.02 15 1 0.2
 PICE.MAR 3 0.02 15 1 0.2
@@ -105,5 +106,5 @@ EcoregionParameters
 493_4 600
 489_2 600
 493_1 600
-DynamicInputFile biomass-succession-dynamic-inputs.txt 
+DynamicInputFile biomass-succession-dynamic-inputs.txt
 AgeOnlyDisturbances:BiomassParameters ../age-only-disturbances.txt

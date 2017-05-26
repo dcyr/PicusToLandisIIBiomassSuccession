@@ -1,5 +1,5 @@
 rm(list = ls())
-a <- "NorthShore"
+a <- "QcNb"
 initDir <- paste("..", a, sep = "/")
 ###
 outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
@@ -79,10 +79,16 @@ clusterN <-  max(1, floor(0.4*detectCores()))  ### choose number of nodes to add
 #######  subsetting simulations
 dfSummary <- get(load("../results/dfSummary.RData"))
 
-index <- unique(c(which.min(dfSummary$brayDissAbs_mean),
-                  which.min(dfSummary$brayDissRel_mean)))
+dfSummarySbSample <- filter(dfSummary, spinupMortalityFraction == 0.018)
+### for QcNb, try imposing SMF == 0.018
+index <- unique(c(which.min(dfSummarySbSample$brayDissAbs_mean),
+                  which.min(dfSummarySbSample$brayDissRel_mean)))
+simIDcorr <- as.character(dfSummarySbSample[index,"simID"])
 
-simIDcorr <- as.character(dfSummary[index,"simID"])
+# index <- unique(c(which.min(dfSummary$brayDissAbs_mean),
+#                   which.min(dfSummary$brayDissRel_mean)))
+# 
+# simIDcorr <- as.character(dfSummary[index,"simID"])
 
 
 simInfoSubsample <- simInfo %>%
@@ -204,32 +210,30 @@ rownames(biomassCalibMaps) <- 1:nrow(biomassCalibMaps)
 save(biomassCalibMaps, file = paste0("biomassCalibMaps.RData"))
 
 ##
-
-
 if(length(simIDcorr)>1) {  # then plot all species separately
     ######################################################
     ######   compute df for total
     for (sp in c(spp, "Total")) {#, spp)) {
-        
+
         df <- biomassCalibMaps %>%
             filter(species == sp)
-        
+
         dfBias <- biomassCalibSummary %>%
             filter(species == sp)
         df <- merge(df, dfBias, by = c("averageMaxBiomassTarget","maxBiomassMultiplier"))
-        
+
         ########################
         #### Compute sp biases
-        
+
         colScale <- scale_fill_gradient2(name = "bias (tons/ha)",
                                          low = "#4477AA", mid = "white", high = "#BB4444", midpoint = 0)
-        
+
         yMax <- max(df$y)
         xMax <- max(df$x)
         ###########
         nMaxBSp <- length(unique(df$maxBiomassMultiplier))
         nMaxB <- length(unique(df$maxBiomassMultiplier))
-        
+
         p <- ggplot(data = df, aes(x = x, y = y, fill = biomassResidual_tonsPerHa,
                                    label = paste(round(residualMean_tonsPerHa, 1), "tons/ha"))) +
             theme_dark() +
@@ -250,20 +254,20 @@ if(length(simIDcorr)>1) {  # then plot all species separately
                   legend.key.size = unit(0.15 * (0.66*nMaxB), "in"),
                   legend.text = element_text(size = rel(0.5 * (0.66*nMaxB)))) +
             labs(title = paste0("Difference between initial biomass after LANDIS spinup and Knn estimations\n", sp))
-        
-        
-        
+
+
+
         ##
         pHeight <- nMaxBSp * 2.5
         pWidth <- (nMaxB+1) * 2
         #
         png(filename = paste0("initBias_SMF",smfString, "_", sp, ".png"),
             width = pWidth, height = pHeight, units = "in", res = 600, pointsize=10)
-        
+
         print(p)
-        
+
         dev.off()
-    } 
+    }
 }
 
 

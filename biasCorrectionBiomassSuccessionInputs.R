@@ -6,10 +6,10 @@
 #################
 #################   However, it re-fetches the original files so that yan's path are restored
 rm(list = ls())
-a <- "NorthShore"
-timestep <- 5
+a <- "QcNb"
+timestep <- 10
 #################   At this point, the spin-up mortality factor has to be set manually here
-SMF <- 0.01
+SMF <- 0.018
 
 ###
 setwd(paste("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/", a, sep = "/"))
@@ -33,7 +33,7 @@ target <- as.numeric(str_split(ABIE.BAL_mult, "\t")[[1]][3])
 ABIE.BAL_mult <- as.numeric(last(str_split(ABIE.BAL_mult, "\t")[[1]]))
 
 
-scenarios <- c("Baseline", "RCP26", "RCP45", "RCP85")
+scenarios <- c("baseline", "RCP26", "RCP45", "RCP85")
 
 readURL <- "https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/LandisInputs/"
 

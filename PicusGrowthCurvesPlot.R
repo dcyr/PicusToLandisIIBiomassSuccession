@@ -51,6 +51,10 @@ for (a in seq_along(areas)) {
                species =  gsub("_", " ", species)) %>%
         mutate(period_scenario = gsub("Baseline ", "", period_scenario))
 
+    ### filtering out some species (for poster illustration)
+    df <- filter(df, species %in% c("Larix laricina", "Picea rubens",
+                                    "Pinus resinosa", "Pinus strobus",
+                                    "Quercus rubra", "Thuja occidentalis", "Tsuga canadensis") == F)
 
     ## shuffling simID for plotting
     ## (if you don't do that, some colors hide the ones just before)
@@ -84,16 +88,18 @@ for (a in seq_along(areas)) {
     colScenarios <- c("black", "dodgerblue2", "goldenrod1", "red3")
     ## plotting
     p <- ggplot(df, aes(x = Year-2000, y = AGB_tonsPerHa, group = simID, col = scenario)) +
-        theme_dark(base_size = 10) +
+        theme_grey(base_size = 10) +
+        #theme_dark(base_size = 10) +
         geom_line(lwd = 0.1, alpha=0.5) +
         scale_colour_manual(values = colScenarios) +
         facet_grid(species ~ period) +
         guides(col = guide_legend(override.aes = list(size = 1, alpha = 1))) +
         labs(title = paste("Pure stand growth as simulated by Picus\nin ",
                            length(unique(df$landtype)), " land types - ",
-                           areaName, "\n", sep=""),
+                           "Saguenay - Lac St-Jean", "\n", sep=""),
              y=expression(paste("Aboveground biomass ", (tons %.% ha^-1), "\n", sep="")),
-             x="\nYear") +
+             x="\nYear",
+             caption = "Some species were left out for ") +
         scale_x_continuous(breaks = c(0, 100, 200))
 
 
@@ -104,7 +110,8 @@ for (a in seq_along(areas)) {
         bg = "white")
 
         print(p + scale_y_continuous(limits = ylim) +
-                  theme(axis.text.x = element_text(size=8, angle = 45, hjust = 1),
+                  theme(plot.caption = element_text(size = rel(0.8)),
+                        axis.text.x = element_text(size=8, angle = 45, hjust = 1),
                         axis.text.y = element_text(size=8),
                         strip.text.x = element_text(size=9),
                         strip.text.y = element_text(size=6)))

@@ -1,6 +1,6 @@
 rm(list = ls())
 
-areas <- "QcNb"
+areas <- "SudStl"
 a <- areas[1]
 
 ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
@@ -16,7 +16,7 @@ rm(wwd)
 ##################
 require(doSNOW)
 require(parallel)
-clusterN <-  max(1, floor(0.5*detectCores()))  ## 5 for LSJ, 10 for NorthShore...
+clusterN <-  max(1, floor(0.6*detectCores()))  ## 5 for LSJ, 10 for NorthShore...
 print(paste(clusterN, "cores"))
 ##################
 
@@ -87,7 +87,7 @@ registerDoSNOW(cl)
 tInit <- Sys.time()
 nSims <- length(simDir)
 file.copy("../simInfo.csv", to = getwd(), overwrite = T)
-brayDist <- foreach(i = seq_along(simDir))  %dopar% { #) %dopar% { ##  %dopar% { #) %dopar% { #
+brayDist <- foreach(i = 324:length(simDir)) %dopar% {#seq_along(simDir))  %dopar% { #) %dopar% { ##  %dopar% { #) %dopar% { #
     require(raster)
     require(vegan)
     # target <- simInfo[i, "averageMaxBiomassTarget"]
@@ -135,7 +135,7 @@ brayDist <- foreach(i = seq_along(simDir))  %dopar% { #) %dopar% { ##  %dopar% {
     ETC <- Sys.time() + (nSims-i)*meanProcessTime
     print(paste("outputs", i, "of", nSims, "completed"))
     print(paste("estimated time at completion:", ETC))
-    removeTmpFiles(h = 0.15)
+    removeTmpFiles(h = 0.05)
 }
 stopCluster(cl)
 #############################

@@ -210,8 +210,8 @@ rownames(biomassCalibMaps) <- 1:nrow(biomassCalibMaps)
 save(biomassCalibMaps, file = paste0("biomassCalibMaps.RData"))
 
 
-biomassCalibMaps <- get(load("../processedOutputs/biomassCalibMaps.RData"))
-biomassCalibSummary <- get(load("../processedOutputs/biomassCalibSummary.RData"))
+#biomassCalibMaps <- get(load("../processedOutputs/biomassCalibMaps.RData"))
+#biomassCalibSummary <- get(load("../processedOutputs/biomassCalibSummary.RData"))
 
 ##
 if(length(simIDcorr)>1) {  # then plot all species separately

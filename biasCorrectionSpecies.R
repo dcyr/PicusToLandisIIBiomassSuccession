@@ -42,7 +42,7 @@ landtypeResampled <- resample(landtypes, r, method = "ngb")
 
 ### loading initial biomass
 biomassKnn <- stack(paste0("../initialBiomass/initBiomassKnnTonsPerHa-", a, "-", spp, ".tif"))
-names(biomassKnn) <- paste0(spp, "_tonsPerHa")
+
 # removing inactive pixels
 biomassKnn[is.na(landtypes)] <- NA
 ################################################################
@@ -64,6 +64,8 @@ biomassKnnTotal_mean <- mean(values(biomassKnnTotal), na.rm = T)
 biomassKnnSppWhenPresent_mean <- c(biomassKnnSppWhenPresent_mean, total = biomassKnnTotal_mean)
 ## initial proportion (Knn estimates)
 biomassKnnProp <- biomassKnn/biomassKnnTotal
+names(biomassKnn) <- paste0(spp, "_tonsPerHa")
+names(biomassKnnProp) <- paste0(spp, "_relAbund")
 #xMatKnn <- values(biomassKnnProp)
 
 
@@ -79,22 +81,26 @@ clusterN <-  max(1, floor(0.4*detectCores()))  ### choose number of nodes to add
 #######  subsetting simulations
 dfSummary <- get(load("../results/dfSummary.RData"))
 
-dfSummarySbSample <-dfSummary #filter(dfSummary, spinupMortalityFraction == 0.018)
 ### for QcNb, try imposing SMF == 0.018
-index <- unique(c(which.min(dfSummarySbSample$brayDissAbs_mean),
-                  which.min(dfSummarySbSample$brayDissRel_mean)))
-simIDcorr <- as.character(dfSummarySbSample[index,"simID"])
+dfSummarySbSample <- dfSummary#filter(dfSummary, spinupMortalityFraction == 0.018)
 
+# ### default procedure, minimize disssimilarity
 # index <- unique(c(which.min(dfSummary$brayDissAbs_mean),
 #                   which.min(dfSummary$brayDissRel_mean)))
+
+### minimizin dissimilarity didn't work for SudStl, I chose manually based on figures.
+index <- which(dfSummarySbSample$maxBiomassMultiplier == 0.5 &
+                   dfSummarySbSample$spinupMortalityFraction == 0.01 &
+                   dfSummarySbSample$averageMaxBiomassTarget == 0.6)
+
+               
+simIDcorr <- as.character(dfSummarySbSample[index,"simID"])
+
 # 
 # simIDcorr <- as.character(dfSummary[index,"simID"])
 
-
 simInfoSubsample <- simInfo %>%
     filter(simID %in% simIDcorr)
-
-
 
 simInfoSubsample <- rbind(simInfoSubsample, simInfo %>%
                               filter(spinupMortalityFraction %in% 0.001,
@@ -151,7 +157,7 @@ biomassCalib <- foreach(i = 1:nrow(simInfoSubsample))  %dopar% { #
 
     ## computing differences between spinup and reference
     x <- x - stack(biomassKnn, biomassKnnTotal)
-
+    sppNames <- c(gsub("_tonsPerHa", "", names(biomassKnn)), "Total")
     ## computing exact statistics
     rasterValues <- values(x)
     rasterValues[rasterValues==0] <- NA
@@ -162,7 +168,7 @@ biomassCalib <- foreach(i = 1:nrow(simInfoSubsample))  %dopar% { #
 
 
     mat <- data.frame(simID = simN,
-                      species = gsub("biomass|Biomass|_|0", "", rownames(mat)),
+                      species = sppNames,
                       mat)
     rownames(mat) <- 1:nrow(mat)
 
@@ -193,6 +199,7 @@ biomassCalib <- foreach(i = 1:nrow(simInfoSubsample))  %dopar% { #
     print(paste(SMF[i], i))
 }
 stopCluster(cl)
+
 names(biomassCalib) <- simInfoSubsample$simID
 subSample <- simInfoSubsample$simID
 ### putting compiled results into tidy data.frame
@@ -210,8 +217,10 @@ rownames(biomassCalibMaps) <- 1:nrow(biomassCalibMaps)
 save(biomassCalibMaps, file = paste0("biomassCalibMaps.RData"))
 
 
-#biomassCalibMaps <- get(load("../processedOutputs/biomassCalibMaps.RData"))
-#biomassCalibSummary <- get(load("../processedOutputs/biomassCalibSummary.RData"))
+# ############################################################
+# biomassCalibMaps <- get(load("../processedOutputs/biomassCalibMaps.RData"))
+# biomassCalibSummary <- get(load("../processedOutputs/biomassCalibSummary.RData"))
+# ############################################################
 
 ##
 if(length(simIDcorr)>1) {  # then plot all species separately
@@ -340,104 +349,104 @@ if (length(simIDcorr) == 1) {
 
 
 
-# ##########################################################################################################################
-# ##########################################################################################################################
-# ### One figure, all species (with correction and no correction)
-# 
-# ## Limits are defined so that they emcompasse about 99? of bias values for total biomass when uncorrected
-# require(dplyr)
-# zLimits <-  biomassCalibMaps %>%
-#     filter(species == "Total"
-#            & simID == simIdRef)
-# 
-# zLimits <- quantile(zLimits$biomassResidual_tonsPerHa, c(0.005, 0.995))
-# # zLimits <- round(max(abs(zLimits))/10)*10
-# # zLimits <- c(-zLimits, zLimits)
-# 
-# zLimits <- c(floor(zLimits[1]/5)*5,
-#              ceiling(zLimits[2]/5)*5)
-# 
-# 
-# zLimits <- c(floor(min(zLimits)/5)*5,
-#              ceiling(max(zLimits)/5)*5)
-# 
-# titleList <- character()
-# if (length(simIDcorr) == 1) {
-#     for (i in c("Corr", "noCorr")) {
-#         if (i == "Corr") {
-#          ID <- first(simInfoSubsample$simID)
-#         }
-#         if (i == "noCorr") {
-#          ID <- simIdRef
-#         }
-#         
-#         
-#         
-#         df <- biomassCalibMaps %>%
-#          filter(simID == ID)
-#         
-#         dfBias <- biomassCalibSummary %>%
-#          filter(simID == ID)
-#         df <- merge(df, dfBias, by = "species")
-#         
-#         ########################
-#         #### Compute sp biases
-#         require(scales)
-#         colScale <- scale_fill_gradient2(name = "bias (tons/ha)",
-#                                          low = muted("blue"), mid = "white", high = muted("red"), midpoint = 0,
-#                                       #low = "#4477AA", mid = "white", high = "#BB4444", midpoint = 0,
-#                                       limits = zLimits)
-#         
-#         
-#         yMax <- max(df$y)
-#         xMax <- max(df$x)
-#         ###########
-#         
-#         p <- ggplot(data = df, aes(x = x, y = y, fill = biomassResidual_tonsPerHa,
-#                                 label = paste(round(residualMean_tonsPerHa, 1), "tons/ha"))) +
-#          theme_dark() +
-#          geom_raster() +
-#          coord_fixed() +
-#          colScale +
-#          facet_wrap( ~ species) +
-#          geom_text(aes(x = xMax, y = yMax,
-#                        label = "mean bias"),
-#                    hjust = 1, size = rel(2.5), fontface = 1) +
-#          geom_text(aes(x = xMax, y = yMax - 25000),
-#                    hjust = 1, size = rel(2.5), fontface = "bold") +#
-#          theme(axis.text = element_blank(),
-#                axis.title = element_blank(),
-#                axis.ticks = element_blank(),
-#                title = element_text(size = rel(1)),
-#                strip.text = element_text(size = rel(0.75)),
-#                legend.key.size = unit(0.25, "in"),
-#                legend.text = element_text(size = rel(1))) +
-#          labs(title = paste0("Difference between initial biomass after LANDIS spinup and Knn estimations"),
-#               subtitle = ifelse(i == "noCorr", paste0("Without bias correction (SMF = ", SMF[2], ")"),
-#                                 paste0("With bias correction (SMF = ", SMF[1], "; maxBmult: ", maxBmult[1], "; ABIE.BAL target ratio: ", AbTargetRatio[1], ")")))
-#         
-#         
-#         
-#         ##
-#         pHeight <- 10
-#         pWidth <- 10
-#         #
-#         fTitle <- paste0("initBias_", i, ".png")
-#         titleList <- append(titleList, fTitle)
-#         png(filename = fTitle,
-#          width = pWidth, height = pHeight, units = "in", res = 600, pointsize=10)
-#         
-#         print(p)
-#         
-#         dev.off()
-#     }
-# }
-# 
-# require(animation)
-# oopt = ani.options(ani.dev="png", ani.type="png", interval = 2, autobrowse = FALSE)
-# ### (Windows users may want to add):  ani.options(convert = 'c:/program files/imagemagick/convert.exe')
-# im.convert(titleList, output = "initBias.gif",
-#            extra.opts = "", clean = F)
+##########################################################################################################################
+##########################################################################################################################
+### One figure, all species (with correction and no correction)
+
+## Limits are defined so that they emcompasse about 99? of bias values for total biomass when uncorrected
+require(dplyr)
+zLimits <-  biomassCalibMaps %>%
+    filter(#simID == simIdRef &
+               species == "Total")
+
+zLimits <- quantile(zLimits$biomassResidual_tonsPerHa, c(0.025, 0.975))
+# zLimits <- round(max(abs(zLimits))/10)*10
+# zLimits <- c(-zLimits, zLimits)
+
+zLimits <- c(floor(zLimits[1]/5)*5,
+             ceiling(zLimits[2]/5)*5)
+
+
+zLimits <- c(floor(min(zLimits)/5)*5,
+             ceiling(max(zLimits)/5)*5)
+
+titleList <- character()
+if (length(simIDcorr) == 1) {
+    for (i in c("Corr", "noCorr")) {
+        if (i == "Corr") {
+         ID <- first(simInfoSubsample$simID)
+        }
+        if (i == "noCorr") {
+         ID <- simIdRef
+        }
+
+
+
+        df <- biomassCalibMaps %>%
+         filter(simID == ID)
+
+        dfBias <- biomassCalibSummary %>%
+         filter(simID == ID)
+        df <- merge(df, dfBias, by = "species")
+
+        ########################
+        #### Compute sp biases
+        require(scales)
+        colScale <- scale_fill_gradient2(name = "bias (tons/ha)",
+                                         low = muted("blue"), mid = "white", high = muted("red"), midpoint = 0,
+                                      #low = "#4477AA", mid = "white", high = "#BB4444", midpoint = 0,
+                                      limits = zLimits)
+
+
+        yMax <- max(df$y)
+        xMax <- max(df$x)
+        ###########
+
+        p <- ggplot(data = df, aes(x = x, y = y, fill = biomassResidual_tonsPerHa,
+                                label = paste(round(residualMean_tonsPerHa, 1), "tons/ha"))) +
+         theme_dark() +
+         geom_raster() +
+         coord_fixed() +
+         colScale +
+         facet_wrap( ~ species) +
+         geom_text(aes(x = xMax, y = yMax,
+                       label = "mean bias"),
+                   hjust = 1, size = rel(2.5), fontface = 1) +
+         geom_text(aes(x = xMax, y = yMax - 35000),
+                   hjust = 1, size = rel(2.5), fontface = "bold") +#
+         theme(axis.text = element_blank(),
+               axis.title = element_blank(),
+               axis.ticks = element_blank(),
+               title = element_text(size = rel(1)),
+               strip.text = element_text(size = rel(0.75)),
+               legend.key.size = unit(0.25, "in"),
+               legend.text = element_text(size = rel(1))) +
+         labs(title = paste0("Difference between initial biomass after LANDIS spinup and Knn estimations"),
+              subtitle = ifelse(i == "noCorr", paste0("Without bias correction (SMF = ", SMF[2], ")"),
+                                paste0("With bias correction (SMF = ", SMF[1], "; maxBmult: ", maxBmult[1], "; ABIE.BAL target ratio: ", AbTargetRatio[1], ")")))
+
+
+
+        ##
+        pHeight <- 10
+        pWidth <- 10
+        #
+        fTitle <- paste0("initBias_", i, ".png")
+        titleList <- append(titleList, fTitle)
+        png(filename = fTitle,
+         width = pWidth, height = pHeight, units = "in", res = 600, pointsize=10)
+
+        print(p)
+
+        dev.off()
+    }
+}
+
+require(animation)
+oopt = ani.options(ani.dev="png", ani.type="png", interval = 2, autobrowse = FALSE)
+### (Windows users may want to add):  ani.options(convert = 'c:/program files/imagemagick/convert.exe')
+im.convert(titleList, output = "initBias.gif",
+           extra.opts = "", clean = F)
 
 
 

@@ -87,7 +87,7 @@ registerDoSNOW(cl)
 tInit <- Sys.time()
 nSims <- length(simDir)
 file.copy("../simInfo.csv", to = getwd(), overwrite = T)
-brayDist <- foreach(i = 324:length(simDir)) %dopar% {#seq_along(simDir))  %dopar% { #) %dopar% { ##  %dopar% { #) %dopar% { #
+brayDist <- foreach(i = seq_along(simDir)) %dopar% {#  %dopar% { #) %dopar% { ##  %dopar% { #) %dopar% { #
     require(raster)
     require(vegan)
     # target <- simInfo[i, "averageMaxBiomassTarget"]

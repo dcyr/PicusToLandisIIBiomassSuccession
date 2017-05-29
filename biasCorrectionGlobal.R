@@ -146,7 +146,7 @@ for (i in maxBmult) {
     z <- df$brayDissAbs_mean
 
     ###
-    fit <- loess(z ~ x + y, span = 0.35, control=loess.control(surface="direct"))
+    fit <- loess(z ~ x + y, span = 0.4, control=loess.control(surface="direct"))
     ###
 
     zPred <- matrix(predict(fit, newdata = xy),

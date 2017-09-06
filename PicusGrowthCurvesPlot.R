@@ -52,9 +52,9 @@ for (a in seq_along(areas)) {
         mutate(period_scenario = gsub("Baseline ", "", period_scenario))
 
     ### filtering out some species (for poster illustration)
-    df <- filter(df, species %in% c("Larix laricina", "Picea rubens",
-                                    "Pinus resinosa", "Pinus strobus",
-                                    "Quercus rubra", "Thuja occidentalis", "Tsuga canadensis") == F)
+    # df <- filter(df, species %in% c("Larix laricina", "Picea rubens",
+    #                                 "Pinus resinosa", "Pinus strobus",
+    #                                 "Quercus rubra", "Thuja occidentalis", "Tsuga canadensis") == F)
 
     ## shuffling simID for plotting
     ## (if you don't do that, some colors hide the ones just before)
@@ -88,7 +88,7 @@ for (a in seq_along(areas)) {
     colScenarios <- c("black", "dodgerblue2", "goldenrod1", "red3")
     ## plotting
     p <- ggplot(df, aes(x = Year-2000, y = AGB_tonsPerHa, group = simID, col = scenario)) +
-        theme_grey(base_size = 10) +
+        theme_dark(base_size = 10) +
         #theme_dark(base_size = 10) +
         geom_line(lwd = 0.1, alpha=0.5) +
         scale_colour_manual(values = colScenarios) +
@@ -98,8 +98,7 @@ for (a in seq_along(areas)) {
                            length(unique(df$landtype)), " land types - ",
                            "Saguenay - Lac St-Jean", "\n", sep=""),
              y=expression(paste("Aboveground biomass ", (tons %.% ha^-1), "\n", sep="")),
-             x="\nYear",
-             caption = "Some species were left out for ") +
+             x="\nYear") +
         scale_x_continuous(breaks = c(0, 100, 200))
 
 

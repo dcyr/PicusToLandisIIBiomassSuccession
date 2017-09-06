@@ -4,5 +4,6 @@
 *.Rmd
 *.html
 *.pdf
+*.log
 processedOutputs/*.csv
 *~

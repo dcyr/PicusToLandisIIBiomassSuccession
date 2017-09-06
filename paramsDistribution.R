@@ -88,7 +88,7 @@ for (a in areas) {
         p <- ggplot(data = params, aes(x=species, y=eval(parse(text=i)), fill=paramSet)) +
             geom_boxplot(outlier.colour = NULL, lwd=0.2, outlier.size = 0.5) +
             coord_flip() +
-            theme_dark() +
+            theme_grey() +
             theme(legend.position="top", legend.direction="horizontal", legend.text=element_text(size=6)) +
             guides(fill = guide_legend(reverse = TRUE)) +
             scale_fill_discrete("")

@@ -88,7 +88,7 @@ for (a in seq_along(areas)) {
     colScenarios <- c("black", "dodgerblue2", "goldenrod1", "red3")
     ## plotting
     p <- ggplot(df, aes(x = Year-2000, y = AGB_tonsPerHa, group = simID, col = scenario)) +
-        theme_dark(base_size = 10) +
+        theme_grey(base_size = 10) +
         #theme_dark(base_size = 10) +
         geom_line(lwd = 0.1, alpha=0.5) +
         scale_colour_manual(values = colScenarios) +
@@ -96,7 +96,7 @@ for (a in seq_along(areas)) {
         guides(col = guide_legend(override.aes = list(size = 1, alpha = 1))) +
         labs(title = paste("Pure stand growth as simulated by Picus\nin ",
                            length(unique(df$landtype)), " land types - ",
-                           "Saguenay - Lac St-Jean", "\n", sep=""),
+                           areaName, "\n", sep=""),
              y=expression(paste("Aboveground biomass ", (tons %.% ha^-1), "\n", sep="")),
              x="\nYear") +
         scale_x_continuous(breaks = c(0, 100, 200))

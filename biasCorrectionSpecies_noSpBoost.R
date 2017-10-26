@@ -83,10 +83,12 @@ dfSummary <- get(load("../results/dfSummary.RData"))
 
 ### for QcNb, try imposing SMF == 0.018
 ### for ALPAC, try imposing SMF == 0.01
+# dfSummarySbSample <- filter(dfSummary,
+#                             spinupMortalityFraction %in% c(0.002, 0.005, 0.01, 0.02) &
+#                                 maxBiomassMultiplier %in% c(0.4, 0.55, 0.7, .85, 1))
 dfSummarySbSample <- filter(dfSummary,
-                            spinupMortalityFraction %in% c(0.002, 0.005, 0.01, 0.02) &
-                                maxBiomassMultiplier %in% c(0.4, 0.55, 0.7, .85, 1))
-                                
+                            spinupMortalityFraction %in% c(0.01) &
+                                maxBiomassMultiplier %in% c(0.75))                                
 
 index <- 1:nrow(dfSummarySbSample)
 
@@ -292,65 +294,65 @@ if(length(simIDcorr)>1) {  # then plot all species separately
 
 
 
-# #############################################################
-# #############################################################
-# #############################################################
-# ### summary tables, comparing with "no correction" simulation
-# #############################################################
-# 
-# if (length(simIDcorr) == 1) {
-#     
-#     # total biomass
-#     x <- stack(paste0(outputDir, "/", simIDcorr, "/output/biomass/biomass_", c(spp, "TotalBiomass"), "_0.tif"))
-#     xNoCorr <- stack(paste0(outputDir, "/", simIdRef, "/output/biomass/biomass_", c(spp, "TotalBiomass"), "_0.tif"))
-#     x[sum(x) == 0] <- NA
-#     xNoCorr[sum(xNoCorr) == 0] <- NA
-#     
-#     crs(x) <- crs(xNoCorr) <- crs(biomassKnn)
-#     extent(x) <- extent(xNoCorr) <- extent(biomassKnn)
-#     
-#     ### convert to tons per ha
-#     x <- x/100
-#     xNoCorr <- xNoCorr/100
-#     
-#     ### computing differences between spinup and reference
-#     xRef <- stack(biomassKnn, biomassKnnTotal)
-#     x <- x - xRef
-#     xNoCorr <- xNoCorr - xRef
-#     
-#     ### computing exact statistics 
-#     # (biomass biases)
-#     rasterValues <- values(x)
-#     rasterValues[rasterValues==0] <- NA
-#     mat <- apply(rasterValues, 2, mean, na.rm = T)
-#     #
-#     rasterValues <- values(xNoCorr)
-#     rasterValues[rasterValues==0] <- NA
-#     mat2 <- apply(rasterValues, 2, mean, na.rm = T)
-#     
-#     mat <- data.frame(biasMean_tonsPerHa_Corr = mat,
-#                       biasMean_tonsPerHa_noCorr = mat2,
-#                       redidualMean_proportion_Corr = mat/biomassKnnSppWhenPresent_mean,
-#                       redidualMean_proportion_noCorr = mat2/biomassKnnSppWhenPresent_mean)
-#     ####
-#     write.csv(mat, file = "summaryTable_biomass.csv", row.names = T)
-#     
-#     ### diss index
-#     index <- which(dfSummary$simID %in% simInfoSubsample$simID)
-#     
-#    
-#     df <- data.frame(simID = dfSummary[index, "simID"],
-#                      distAbs = dfSummary[index, "brayDissAbs_mean"],
-#                      distRel = dfSummary[index, "brayDissRel_mean"])
-#     
-#     df <- merge(df, simInfo)
-#     write.csv(df, file = "summaryTable_diss.csv", row.names = F)
-#     
-#     ####
-#     ### copying bias corrected files to working directory
-#     file.copy(paste0(outputDir, "/", simIDcorr, "/biomass-succession-dynamic-inputs.txt"),
-#               paste0("biomass-succession-dynamic-inputs_", a, "_BiasCorrected.txt"), overwrite = T)
-# }
+#############################################################
+#############################################################
+#############################################################
+### summary tables, comparing with "no correction" simulation
+#############################################################
+
+if (length(simIDcorr) == 1) {
+
+    # total biomass
+    x <- stack(paste0(outputDir, "/", simIDcorr, "/output/biomass/biomass_", c(spp, "TotalBiomass"), "_0.tif"))
+    xNoCorr <- stack(paste0(outputDir, "/", simIdRef, "/output/biomass/biomass_", c(spp, "TotalBiomass"), "_0.tif"))
+    x[sum(x) == 0] <- NA
+    xNoCorr[sum(xNoCorr) == 0] <- NA
+
+    crs(x) <- crs(xNoCorr) <- crs(biomassKnn)
+    extent(x) <- extent(xNoCorr) <- extent(biomassKnn)
+
+    ### convert to tons per ha
+    x <- x/100
+    xNoCorr <- xNoCorr/100
+
+    ### computing differences between spinup and reference
+    xRef <- stack(biomassKnn, biomassKnnTotal)
+    x <- x - xRef
+    xNoCorr <- xNoCorr - xRef
+
+    ### computing exact statistics
+    # (biomass biases)
+    rasterValues <- values(x)
+    rasterValues[rasterValues==0] <- NA
+    mat <- apply(rasterValues, 2, mean, na.rm = T)
+    #
+    rasterValues <- values(xNoCorr)
+    rasterValues[rasterValues==0] <- NA
+    mat2 <- apply(rasterValues, 2, mean, na.rm = T)
+
+    mat <- data.frame(biasMean_tonsPerHa_Corr = mat,
+                      biasMean_tonsPerHa_noCorr = mat2,
+                      redidualMean_proportion_Corr = mat/biomassKnnSppWhenPresent_mean,
+                      redidualMean_proportion_noCorr = mat2/biomassKnnSppWhenPresent_mean)
+    ####
+    write.csv(mat, file = "summaryTable_biomass.csv", row.names = T)
+
+    ### diss index
+    index <- which(dfSummary$simID %in% simInfoSubsample$simID)
+
+
+    df <- data.frame(simID = dfSummary[index, "simID"],
+                     distAbs = dfSummary[index, "brayDissAbs_mean"],
+                     distRel = dfSummary[index, "brayDissRel_mean"])
+
+    df <- merge(df, simInfo)
+    write.csv(df, file = "summaryTable_diss.csv", row.names = F)
+
+    ####
+    ### copying bias corrected files to working directory
+    file.copy(paste0(outputDir, "/", simIDcorr, "/biomass-succession-dynamic-inputs.txt"),
+              paste0("biomass-succession-dynamic-inputs_", a, "_BiasCorrected.txt"), overwrite = T)
+}
 
 
 
@@ -359,94 +361,94 @@ if(length(simIDcorr)>1) {  # then plot all species separately
 ##########################################################################################################################
 ### One figure, all species (with correction and no correction)
 
-# ## Limits are defined so that they emcompasse about 99% of bias values for total biomass when uncorrected
-# require(dplyr)
-# zLimits <-  biomassCalibMaps %>%
-#     filter(#simID == simIdRef &
-#                species == "Total")
-# 
-# zLimits <- quantile(zLimits$biomassResidual_tonsPerHa, c(0.025, 0.975))
-# # zLimits <- round(max(abs(zLimits))/10)*10
-# # zLimits <- c(-zLimits, zLimits)
-# 
-# zLimits <- c(floor(zLimits[1]/5)*5,
-#              ceiling(zLimits[2]/5)*5)
-# 
-# 
-# zLimits <- c(floor(min(zLimits)/5)*5,
-#              ceiling(max(zLimits)/5)*5)
-# 
-# titleList <- character()
-# if (length(simIDcorr) == 1) {
-#     for (i in c("Corr", "noCorr")) {
-#         if (i == "Corr") {
-#          ID <- first(simInfoSubsample$simID)
-#         }
-#         if (i == "noCorr") {
-#          ID <- simIdRef
-#         }
-# 
-# 
-# 
-#         df <- biomassCalibMaps %>%
-#          filter(simID == ID)
-# 
-#         dfBias <- biomassCalibSummary %>%
-#          filter(simID == ID)
-#         df <- merge(df, dfBias, by = "species")
-# 
-#         ########################
-#         #### Compute sp biases
-#         require(scales)
-#         colScale <- scale_fill_gradient2(name = "bias (tons/ha)",
-#                                          low = muted("blue"), mid = "white", high = muted("red"), midpoint = 0,
-#                                       #low = "#4477AA", mid = "white", high = "#BB4444", midpoint = 0,
-#                                       limits = zLimits)
-# 
-# 
-#         yMax <- max(df$y)
-#         xMax <- max(df$x)
-#         ###########
-# 
-#         p <- ggplot(data = df, aes(x = x, y = y, fill = biomassResidual_tonsPerHa,
-#                                 label = paste(round(residualMean_tonsPerHa, 1), "tons/ha"))) +
-#          theme_dark() +
-#          geom_raster() +
-#          coord_fixed() +
-#          colScale +
-#          facet_wrap( ~ species) +
-#          geom_text(aes(x = xMax, y = yMax,
-#                        label = "mean bias"),
-#                    hjust = 1, size = rel(2.5), fontface = 1) +
-#          geom_text(aes(x = xMax, y = yMax - 35000),
-#                    hjust = 1, size = rel(2.5), fontface = "bold") +#
-#          theme(axis.text = element_blank(),
-#                axis.title = element_blank(),
-#                axis.ticks = element_blank(),
-#                title = element_text(size = rel(1)),
-#                strip.text = element_text(size = rel(0.75)),
-#                legend.key.size = unit(0.25, "in"),
-#                legend.text = element_text(size = rel(1))) +
-#          labs(title = paste0("Difference between initial biomass after LANDIS spinup and Knn estimations"),
-#               subtitle = ifelse(i == "noCorr", paste0("Without bias correction (SMF = ", SMF[2], ")"),
-#                                 paste0("With bias correction (SMF = ", SMF[1], "; maxBmult: ", maxBmult[1], "; ABIE.BAL target ratio: ", AbTargetRatio[1], ")")))
-# 
-# 
-# 
-#         ##
-#         pHeight <- 10
-#         pWidth <- 10
-#         #
-#         fTitle <- paste0("initBias_", i, ".png")
-#         titleList <- append(titleList, fTitle)
-#         png(filename = fTitle,
-#          width = pWidth, height = pHeight, units = "in", res = 600, pointsize=10)
-# 
-#         print(p)
-# 
-#         dev.off()
-#     }
-# }
+## Limits are defined so that they emcompasse about 99% of bias values for total biomass when uncorrected
+require(dplyr)
+zLimits <-  biomassCalibMaps %>%
+    filter(#simID == simIdRef &
+               species == "Total")
+
+zLimits <- quantile(zLimits$biomassResidual_tonsPerHa, c(0.025, 0.975))
+# zLimits <- round(max(abs(zLimits))/10)*10
+# zLimits <- c(-zLimits, zLimits)
+
+zLimits <- c(floor(zLimits[1]/5)*5,
+             ceiling(zLimits[2]/5)*5)
+
+
+zLimits <- c(floor(min(zLimits)/5)*5,
+             ceiling(max(zLimits)/5)*5)
+
+titleList <- character()
+if (length(simIDcorr) == 1) {
+    for (i in c("Corr", "noCorr")) {
+        if (i == "Corr") {
+         ID <- first(simInfoSubsample$simID)
+        }
+        if (i == "noCorr") {
+         ID <- simIdRef
+        }
+
+
+
+        df <- biomassCalibMaps %>%
+         filter(simID == ID)
+
+        dfBias <- biomassCalibSummary %>%
+         filter(simID == ID)
+        df <- merge(df, dfBias, by = "species")
+
+        ########################
+        #### Compute sp biases
+        require(scales)
+        colScale <- scale_fill_gradient2(name = "bias (tons/ha)",
+                                         low = muted("blue"), mid = "white", high = muted("red"), midpoint = 0,
+                                      #low = "#4477AA", mid = "white", high = "#BB4444", midpoint = 0,
+                                      limits = zLimits)
+
+
+        yMax <- max(df$y)
+        xMax <- max(df$x)
+        ###########
+
+        p <- ggplot(data = df, aes(x = x, y = y, fill = biomassResidual_tonsPerHa,
+                                label = paste(round(residualMean_tonsPerHa, 1), "tons/ha"))) +
+         theme_dark() +
+         geom_raster() +
+         coord_fixed() +
+         colScale +
+         facet_wrap( ~ species) +
+         geom_text(aes(x = xMax, y = yMax,
+                       label = "mean bias"),
+                   hjust = 1, size = rel(2.5), fontface = 1) +
+         geom_text(aes(x = xMax, y = yMax - 35000),
+                   hjust = 1, size = rel(2.5), fontface = "bold") +#
+         theme(axis.text = element_blank(),
+               axis.title = element_blank(),
+               axis.ticks = element_blank(),
+               title = element_text(size = rel(1)),
+               strip.text = element_text(size = rel(0.75)),
+               legend.key.size = unit(0.25, "in"),
+               legend.text = element_text(size = rel(1))) +
+         labs(title = paste0("Difference between initial biomass after LANDIS spinup and Knn estimations"),
+              subtitle = ifelse(i == "noCorr", paste0("Without bias correction (SMF = ", SMF[2], ")"),
+                                paste0("With bias correction (SMF = ", SMF[1], "; maxBmult: ", maxBmult[1], ")")))
+
+
+
+        ##
+        pHeight <- 10
+        pWidth <- 10
+        #
+        fTitle <- paste0("initBias_", i, ".png")
+        titleList <- append(titleList, fTitle)
+        png(filename = fTitle,
+         width = pWidth, height = pHeight, units = "in", res = 600, pointsize=10)
+
+        print(p)
+
+        dev.off()
+    }
+}
 # 
 # require(animation)
 # oopt = ani.options(ani.dev="png", ani.type="png", interval = 2, autobrowse = FALSE)

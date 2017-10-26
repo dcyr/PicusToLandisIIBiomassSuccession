@@ -6,7 +6,7 @@
 #################
 #################   However, it re-fetches the original files so that yan's path are restored
 rm(list = ls())
-a <- "SudStl"
+a <- "QcCentral"
 timestep <- 5
 #################   At this point, the spin-up mortality factor has to be set manually here
 SMF <- 0.01

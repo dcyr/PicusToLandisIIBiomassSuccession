@@ -1,0 +1,67 @@
+LandisData "Biomass Succession"
+Timestep 10 
+SeedingAlgorithm WardSeedDispersal
+InitialCommunities "G:\YAN\LANDIS\quebec\QcCentral\initial-communities_QcCentral.dat" 
+InitialCommunitiesMap "G:\YAN\LANDIS\quebec\QcCentral\initial-communities_QcCentral.tif" 
+CalibrateMode no
+SpinupMortalityFraction 0.01 
+>> **********************
+MinRelativeBiomass
+>> Shade
+>> Class Ecoregions
+>> ----- ------------
+418_1 418_2 418_3 418_4 418_5 421_1 421_2 421_3 421_4 421_5 437_3 439_1 439_2 439_3 439_4 439_5 440_1 440_2 440_3 440_4 440_5 441_1 441_2 441_3 441_4 441_5 
+1  20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 20% 
+2  40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 40% 
+3  50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 50% 
+4  70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 70% 
+5  90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 90% 
+>> ****************************
+SufficientLight
+>> Spp Shade Probability
+>> Class by Actual Shade
+>> ---------- --------------------
+>> 0 1 2 3 4 5
+1 1 0.5 0 0 0 0
+2 1 1 0.5 0 0 0
+3 1 1 1 0.5 0 0
+4 1 1 1 1 0.5 0
+5 1 1 1 1 1 1
+>> **************************************************
+SpeciesParameters
+>> Species Leaf Woody Mortal Growth Leaf
+>> Longevity Decay Rate Shape Curve Lignin%
+>> -------- --------- ---------- --------------- ------
+
+>> ****************************
+EcoregionParameters
+>> AET
+>> mm
+418_1 600
+418_2 600
+418_3 600
+418_4 600
+418_5 600
+421_1 600
+421_2 600
+421_3 600
+421_4 600
+421_5 600
+437_3 600
+439_1 600
+439_2 600
+439_3 600
+439_4 600
+439_5 600
+440_1 600
+440_2 600
+440_3 600
+440_4 600
+440_5 600
+441_1 600
+441_2 600
+441_3 600
+441_4 600
+441_5 600
+DynamicInputFile "G:\YAN\LANDIS\quebec\QcCentral\biomass-succession-dynamic-inputs_QcCentral_baseline.txt" 
+AgeOnlyDisturbances:BiomassParameters "C:\YAN\LANDIS\Landis-II\AODist.txt"  

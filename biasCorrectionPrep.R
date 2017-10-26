@@ -1,6 +1,6 @@
 rm(list = ls())
 
-a <- "SudStl"
+a <- "ALPAC"
 setwd(paste("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection", a, sep = "/"))
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
@@ -26,10 +26,15 @@ maxBiomassRatios <- as.data.frame(maxBiomassRatios)
 
 ### these are targetted proportion of maxBiomass for given spp
 
-maxBiomassCoeff <- seq(0.3, 1, by = 0.1)
-propMaxBiomassBoost <- list(ABIE.BAL = c(maxBiomassRatios[which(maxBiomassRatios$species == "ABIE.BAL"),
-                                                          "maxBiomassRatio"], seq(0.2, 1, 0.1)))
-spinupMortalityFraction <- c(0, 0.0005, 0.001, 0.005, 0.01, 0.02)
+#maxBiomassCoeff <- seq(0.3, 1, by = 0.1)
+maxBiomassCoeff <- 1
+# propMaxBiomassBoost <- list(ABIE.BAL = c(maxBiomassRatios[which(maxBiomassRatios$species == "ABIE.BAL"),
+#                                                          "maxBiomassRatio"], seq(0.2, 1, 0.1)))
+# propMaxBiomassBoost <- list(ABIE.BAL = c(maxBiomassRatios[which(maxBiomassRatios$species == "ABIE.BAL"),
+#                                                           "maxBiomassRatio"], .6))
+propMaxBiomassBoost <- list(BETU.PAP = c(maxBiomassRatios[which(maxBiomassRatios$species == "BETU.PAP"),
+                                                          "maxBiomassRatio"]))
+spinupMortalityFraction <- c(0, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.015, 0.02)
 
 
 #     
@@ -44,6 +49,8 @@ for (i in seq_along(propMaxBiomassBoost)) {
     corr <- propMaxBiomassBoost[[sp]] / as.numeric(maxBiomassRatios[maxBiomassRatios$species == sp, "maxBiomassRatio"])
     correctionFactors[[sp]] <- corr
 }
+
+
 
 
 files <- character()
@@ -126,7 +133,7 @@ for (k in maxBiomassCoeff) {
 ########################
 ### generating simulation packages
 
-sp <- "ABIE.BAL"
+sp <- "BETU.PAP"
 nSims <- length(files) * length(spinupMortalityFraction)
 tmp <- str_split(gsub(".txt|sppRatio|maxBmult", "", files), "_")
 targetABIEBAL <- as.numeric(lapply(tmp, function(x) x[2]))

@@ -1,6 +1,6 @@
 rm(list = ls())
 
-areas <- "SudStl"
+areas <- "ALPAC"
 a <- areas[1]
 
 ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
@@ -16,7 +16,7 @@ rm(wwd)
 ##################
 require(doSNOW)
 require(parallel)
-clusterN <-  max(1, floor(0.6*detectCores()))  ## 5 for LSJ, 10 for NorthShore...
+clusterN <-  max(1, floor(0.9*detectCores()))  ## 5 for LSJ, 10 for NorthShore...
 print(paste(clusterN, "cores"))
 ##################
 

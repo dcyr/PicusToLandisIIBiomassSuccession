@@ -85,7 +85,7 @@ dfSummary <- get(load("../results/dfSummary.RData"))
 ### for ALPAC, try imposing SMF == 0.01
 dfSummarySbSample <- filter(dfSummary,
                             spinupMortalityFraction %in% c(0.002, 0.005, 0.01, 0.02) &
-                                maxBiomassMultiplier %in% c(0.4, 0.55, 0.7, .85))
+                                maxBiomassMultiplier %in% c(0.4, 0.55, 0.7, .85, 1))
                                 
 
 index <- 1:nrow(dfSummarySbSample)

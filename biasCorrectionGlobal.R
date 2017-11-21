@@ -6,7 +6,7 @@
 #################  
 #################  It takes about one minute for a thousand simulations
 rm(list = ls())
-a <- "ALPAC"
+a <- "LSJ"
 ###
 setwd(paste("~/Travail/SCF/Landis/Picus/PicusToLandisIIBiomassSuccession/biasCorrection/", a, sep = "/"))
 wwd <- paste(paste(getwd(), Sys.Date(), sep = "/"))
@@ -119,7 +119,7 @@ labelRel = .6
 titleRel = .75
 
 #### grid lines for surface inter/extrapolation (careful with extrapolation because this is loess!!)
-gridLines <- 100
+gridLines <- 50
 
 xPred <- seq(min(dfSummary$spinupMortalityFraction),
              max(dfSummary$spinupMortalityFraction), length.out = gridLines)
@@ -146,7 +146,7 @@ for (i in maxBmult) {
     z <- df$brayDissAbs_mean
 
     ###
-    fit <- loess(z ~ x + y, span = 0.4, control=loess.control(surface="direct"))
+    fit <- loess(z ~ x + y, span = 0.75, control=loess.control(surface="direct"))
     ###
 
     zPred <- matrix(predict(fit, newdata = xy),
@@ -220,7 +220,7 @@ for (i in maxBmult) {
     y <- df$averageMaxBiomassTarget
     z <- df$brayDissRel_mean
     ###
-    fit <- loess(z ~ x + y, span =  0.35, control=loess.control(surface="direct"))
+    fit <- loess(z ~ x + y, span =  0.8, control=loess.control(surface="direct"))
     #
     zPred <- matrix(predict(fit, newdata = xy),
                     nrow = gridLines, ncol = gridLines)
@@ -306,7 +306,7 @@ for (i in unique(dfSummary$spinupMortalityFraction)) {
     #
     # cols <- colAll[findInterval(z, breaks)]
     ###
-    fit <- loess(z ~ x + y, span = 0.2, control=loess.control(surface="direct"))
+    fit <- loess(z ~ x + y, span = 0.5, control=loess.control(surface="direct"))
     ############################################################
     zPred <- matrix(predict(fit, newdata = xy),
                     nrow = gridLines, ncol = gridLines)

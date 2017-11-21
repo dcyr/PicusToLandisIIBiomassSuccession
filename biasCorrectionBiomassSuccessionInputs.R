@@ -6,8 +6,8 @@
 #################
 #################   However, it re-fetches the original files so that yan's path are restored
 rm(list = ls())
-a <- "QcCentral"
-timestep <- 5
+a <- "ALPAC"
+timestep <- 10
 #################   At this point, the spin-up mortality factor has to be set manually here
 SMF <- 0.01
 
@@ -33,13 +33,14 @@ target <- as.numeric(str_split(ABIE.BAL_mult, "\t")[[1]][3])
 ABIE.BAL_mult <- as.numeric(last(str_split(ABIE.BAL_mult, "\t")[[1]]))
 
 
-scenarios <- c("Baseline", "RCP26", "RCP45", "RCP85")
+scenarios <- c("baseline", "RCP26", "RCP45", "RCP85")
 
 readURL <- "https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/LandisInputs/"
 
 for (s in scenarios) {
-    dynamicInputs <- paste0(readURL, a, "/biomass-succession-dynamic-inputs_", a, "_", s,
-                            ifelse(timestep == 5, "_5yrsTS.txt", ".txt"))
+    
+    fNameOriginal <- paste0("biomass-succession-dynamic-inputs_", a, "_", s, ifelse(timestep == 5, "_5yrsTS.txt", ".txt"))
+    dynamicInputs <- paste0(readURL, a, "/",  fNameOriginal)
     tmpFile <- tempfile()
     download.file(dynamicInputs, tmpFile, method="wget")
     
@@ -52,14 +53,13 @@ for (s in scenarios) {
     dynamicInputs[index, 5:6] <- round(dynamicInputs[index, 5:6]*ABIE.BAL_mult)
     
     ##### writing to file
-    fileName <- paste0("biomass-succession-dynamic-inputs_", a, "_", s,
-                       ifelse(timestep == 5, "_5yrsTS_BiasCorrected.txt","_BiasCorrected.txt"))
+    fileName <- gsub(".txt","_BiasCorrected.txt", fNameOriginal)
     
     sink(fileName)
     cat('LandisData "Dynamic Input Data"')
     cat("\r\n")
     cat("\r\n")
-    cat(">> Warning - This is a bias-corrected file")
+    cat(">> WARNING - THIS IS A BIAS-CORRECTED INPUT FILE")
     cat("\r\n")
     cat("\r\n")
     cat(">> The following multiplier was applied to all species's original maxB and maxANPP")
@@ -67,14 +67,14 @@ for (s in scenarios) {
     cat(paste0(c(">>", "multiplier"), collapse = "\t"))
     cat("\r\n")
     cat(paste0(c(">>", maxBmult), collapse = "\t"))
-    cat("\r\n")
-    cat("\r\n")
-    cat(">> The following species' parameters (maxANPP and maxB) have also been modified")
-    cat("\r\n")
-    cat("\r\n")
-    cat(paste0(c(">>", "species" , "\taverageMaxBiomassTarget", "finalMultiplier"), collapse = "\t"))
-    cat("\r\n")
-    cat(paste0(c(">>", "ABIE.BAL", target, "\t", ABIE.BAL_mult),  collapse = "\t"))
+    # cat("\r\n")
+    # cat("\r\n")
+    # cat(">> The following species' parameters (maxANPP and maxB) have also been modified")
+    # cat("\r\n")
+    # cat("\r\n")
+    # cat(paste0(c(">>", "species" , "\taverageMaxBiomassTarget", "finalMultiplier"), collapse = "\t"))
+    # cat("\r\n")
+    # cat(paste0(c(">>", "ABIE.BAL", target, "\t", ABIE.BAL_mult),  collapse = "\t"))
     cat("\r\n")
     cat("\r\n")
     cat(">>\tyear\tlandtype\tspecies\tprobEst\tmaxANPP\tmaxB")
@@ -94,9 +94,12 @@ for (s in scenarios) {
     tmpFile <- tempfile()
     download.file(mainInputs, tmpFile, method="wget")
     
+    ## updating SMF, Timestep, and path to dynamic inputs
     x <- readLines(con = tmpFile)
     x[grep("SpinupMortalityFraction", x)] <- paste("SpinupMortalityFraction", SMF)
     x[grep("Timestep", x)] <- paste("Timestep", timestep)
+    pathIndex <- grep(fNameOriginal, x)
+    x[pathIndex] <- gsub(fNameOriginal, fileName, x[pathIndex])
     
     ##### writing updated main inputs to file
     fileName <- paste0("biomass-succession-main-inputs_", a, "_", s,

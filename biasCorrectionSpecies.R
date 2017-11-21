@@ -1,5 +1,5 @@
 rm(list = ls())
-a <- "ALPAC"
+a <- "LSJ"
 initDir <- paste("..", a, sep = "/")
 ###
 outputDir <- ifelse(Sys.info()["nodename"] == "dcyr-ThinkPad-X220",
@@ -84,13 +84,14 @@ dfSummary <- get(load("../results/dfSummary.RData"))
 ### for QcNb, try imposing SMF == 0.018
 ### for ALPAC, try imposing SMF == 0.01
 dfSummarySbSample <- filter(dfSummary,
-                            spinupMortalityFraction %in% c(0.002, 0.005, 0.01, 0.02) &
-                                maxBiomassMultiplier %in% c(0.4, 0.55, 0.7, .85))
+                            spBiomassMultiplier == 1 &
+                            #spinupMortalityFraction %in% c(0.002, 0.005, 0.01, 0.02) &
+                                maxBiomassMultiplier %in% c(0.4, 0.5, 0.6))
                                 
 
 index <- 1:nrow(dfSummarySbSample)
 
-# # ### default procedure, minimize disssimilarity
+# # # ### default procedure, minimize disssimilarity
 # index <- unique(c(which.min(dfSummary$brayDissAbs_mean),
 #                   which.min(dfSummary$brayDissRel_mean)))
 
@@ -99,7 +100,6 @@ index <- 1:nrow(dfSummarySbSample)
 #                    dfSummarySbSample$spinupMortalityFraction == 0.01 &
 #                    dfSummarySbSample$averageMaxBiomassTarget == 0.6)
 
-               
 simIDcorr <- as.character(dfSummarySbSample[index,"simID"])
 
 # 
@@ -109,7 +109,7 @@ simInfoSubsample <- simInfo %>%
     filter(simID %in% simIDcorr)
 
 simInfoSubsample <- rbind(simInfoSubsample, simInfo %>%
-                              filter(spinupMortalityFraction %in% 0.002,
+                              filter(spinupMortalityFraction %in% 0.01,
                                      maxBiomassMultiplier == 1, 
                                      spBiomassMultiplier == 1))
 
@@ -239,7 +239,7 @@ if(length(simIDcorr)>1) {  # then plot all species separately
 
         dfBias <- biomassCalibSummary %>%
             filter(species == sp)
-        df <- merge(df, dfBias, by = c("averageMaxBiomassTarget","maxBiomassMultiplier"))
+        df <- merge(df, dfBias, by = c("spinupMortalityFraction","maxBiomassMultiplier"))
 
         ########################
         #### Compute sp biases
@@ -259,11 +259,12 @@ if(length(simIDcorr)>1) {  # then plot all species separately
             geom_raster() +
             coord_fixed() +
             colScale +
-            facet_grid(averageMaxBiomassTarget ~ maxBiomassMultiplier) +
+            #facet_grid(averageMaxBiomassTarget ~ maxBiomassMultiplier) +
+            facet_grid(spinupMortalityFraction ~ maxBiomassMultiplier) +
             geom_text(aes(x = xMax, y = yMax,
                           label = "mean bias"),
                       hjust = 1, size = rel(3), fontface = 1) +
-            geom_text(aes(x = xMax, y = yMax - 17000),
+            geom_text(aes(x = xMax, y = yMax - 22000),
                       hjust = 1, size = rel(3), fontface = "bold") +#
             theme(axis.text = element_blank(),
                   axis.title = element_blank(),
@@ -280,7 +281,7 @@ if(length(simIDcorr)>1) {  # then plot all species separately
         pHeight <- nMaxBSp * 2.5
         pWidth <- (nMaxB+1) * 2
         #
-        png(filename = paste0("initBias_SMF",smfString, "_", sp, ".png"),
+        png(filename = paste0("initBias_", sp, ".png"),
             width = pWidth, height = pHeight, units = "in", res = 600, pointsize=10)
 
         print(p)
